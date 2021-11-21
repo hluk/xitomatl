@@ -4,7 +4,17 @@ import logging
 APP_ID = "pomodoro"
 
 log = logging.getLogger(__name__)
-logging.basicConfig(
-    level=logging.DEBUG,
-    format=f"%(asctime)s {APP_ID} %(levelname)s: %(message)s",
-)
+
+
+def init_logging():
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(levelname)s: %(message)s",
+    )
+
+
+def init_debug_logging():
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format=f"%(asctime)s {APP_ID} %(levelname)s: %(message)s",
+    )

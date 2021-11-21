@@ -11,7 +11,7 @@ from PySide6.QtCore import QCoreApplication, QSettings
 
 from xitomatl import __version__
 from xitomatl.app import App
-from xitomatl.log import APP_ID, log
+from xitomatl.log import APP_ID, init_debug_logging, init_logging, log
 
 
 def main():
@@ -35,7 +35,19 @@ def main():
             f"(default {QSettings().fileName()})"
         ),
     )
+    parser.add_argument(
+        "-d",
+        "--debug",
+        default=False,
+        action="store_true",
+        help="print debug information",
+    )
     args = parser.parse_args()
+
+    if args.debug:
+        init_debug_logging()
+    else:
+        init_logging()
 
     if args.config:
         settings = QSettings(args.config, QSettings.IniFormat)
