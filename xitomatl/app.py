@@ -20,25 +20,7 @@ class App:
 
         self.icon = QSystemTrayIcon()
         self.icon.activated.connect(self.on_activated)
-
-        self.menu = QMenu()
-        self.menu.addAction("&Start", self.pomodoro.start)
-        self.menu.addAction("&Next", self.pomodoro.next)
-        self.menu.addAction("&Stop", self.pomodoro.stop)
-
-        self.menu.addSeparator()
-        number = 0
-        for index, task in enumerate(self.pomodoro.tasks):
-            if task.in_menu:
-                number += 1
-                start_task = start_task_callback(self.pomodoro, index)
-                act = self.menu.addAction(f"&{number}. {task}", start_task)
-                act.setData(index)
-
-        self.menu.addSeparator()
-        self.menu.addAction("&Quit", self.app.quit)
-
-        self.icon.setContextMenu(self.menu)
+        self.icon.setContextMenu(QMenu())
 
         self.on_state_changed()
         self.icon.show()
@@ -56,16 +38,25 @@ class App:
         self.icon.setIcon(self.pomodoro.current_icon())
         self.icon.setToolTip(f"Pomodoro: {self.pomodoro}")
 
-        # Mark current task in menu.
-        current_index = self.pomodoro.current_task_index
-        for act in self.menu.actions():
-            text = act.text()
-            data = act.data()
-            if text.startswith(">"):
-                if data != current_index:
-                    act.setText(text[1:])
-            elif data == current_index:
-                act.setText(">" + text)
+        menu = self.icon.contextMenu()
+        menu.clear()
+        menu.addAction("&Start", self.pomodoro.start)
+        menu.addAction("&Next", self.pomodoro.next)
+        menu.addAction("&Stop", self.pomodoro.stop)
+
+        menu.addSeparator()
+        number = 0
+        for index, task in enumerate(self.pomodoro.tasks):
+            if task.in_menu:
+                number += 1
+                text = f"&{number}. {task}"
+                if index == self.pomodoro.current_task_index:
+                    text = f">{text}"
+                start_task = start_task_callback(self.pomodoro, index)
+                menu.addAction(text, start_task)
+
+        menu.addSeparator()
+        menu.addAction("&Quit", self.app.quit)
 
     def exec(self):
         return self.app.exec()
