@@ -5,6 +5,7 @@ from PySide6.QtCore import QElapsedTimer, Qt, QTimer
 from PySide6.QtGui import QColor, QFont, QIcon, QPainter, QPen, QPixmap
 
 from xitomatl.log import log
+from xitomatl.tasks import DEFAULT_TASKS, read_tasks
 
 DIR = os.path.abspath(os.path.dirname(__file__))
 ICON_SIZE = 32
@@ -13,35 +14,6 @@ ICON_TEXT_X = 0
 ICON_TEXT_Y = 15
 ICON_RADIUS = 30
 ICON_PADDING = 10
-ICON_FONT = "Overpass ExtraBold"
-
-
-class Task:
-    def __init__(self, minutes, name=None):
-        self.minutes = minutes
-
-    def __str__(self):
-        return f"{self.name}/{self.minutes}"
-
-
-class Focus(Task):
-    name = "focus"
-    color = "#007ba7"
-    text_color = "white"
-    important_color = "#ff0040"
-
-
-class Break(Task):
-    name = "break"
-    color = "#de3163"
-    text_color = "white"
-    important_color = "white"
-
-
-FOCUS = Focus(minutes=25)
-SHORT = Break(minutes=5)
-LONG = Break(minutes=30)
-SHORT_COUNT = 4
 
 
 class State:
@@ -53,7 +25,15 @@ class Pomodoro:
     def __init__(self, settings):
         self.state = State.Stopped
 
-        self.tasks = [FOCUS, SHORT] * SHORT_COUNT + [FOCUS, LONG]
+        try:
+            self.tasks = read_tasks(settings) or DEFAULT_TASKS
+        except Exception:
+            log.exception(
+                "Failed to read [tasks] from configuration file %s",
+                settings.fileName(),
+            )
+            raise
+
         self.current_task_index = 0
         self.elapsed = QElapsedTimer()
         self.elapsed.start()
@@ -63,7 +43,6 @@ class Pomodoro:
         self.timer.setTimerType(Qt.VeryCoarseTimer)
         self.timer.timeout.connect(self.on_timeout)
 
-        self.font_name = settings.value("font_name", ICON_FONT)
         self.icon_size = int(settings.value("icon_size", ICON_SIZE))
         self.icon_text_size = int(
             settings.value("icon_text_size", ICON_TEXT_SIZE)
@@ -115,7 +94,7 @@ class Pomodoro:
             if self.state == State.Running:
                 icon_text = str(self.remaining_minutes())
 
-                font = QFont(self.font_name)
+                font = QFont(task.font)
                 font.setPixelSize(self.icon_text_size * self.icon_size / 100)
 
                 painter.setFont(font)

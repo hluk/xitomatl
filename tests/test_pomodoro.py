@@ -1,4 +1,5 @@
-from xitomatl.pomodoro import SHORT_COUNT, Pomodoro, State
+from xitomatl.pomodoro import Pomodoro, State
+from xitomatl.tasks import SHORT_BREAK_COUNT
 
 
 class Settings:
@@ -8,8 +9,17 @@ class Settings:
         else:
             self.values = values
 
-    def value(self, key, default):
-        return None
+    def value(self, key, default=None):
+        return default
+
+    def beginReadArray(self, _key):
+        return 0
+
+    def endArray(self):
+        pass
+
+    def fileName(self):
+        return "fake.ini"
 
 
 def test_pomodoro_init():
@@ -25,7 +35,7 @@ def test_pomodoro_next():
     settings = Settings()
     pomodoro = Pomodoro(settings)
 
-    for i in range(SHORT_COUNT):
+    for i in range(SHORT_BREAK_COUNT):
         pomodoro.next()
         assert pomodoro.state == State.Stopped
         assert pomodoro.current_task().name == "break"
