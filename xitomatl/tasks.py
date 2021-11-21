@@ -42,7 +42,7 @@ class Break(Task):
 FOCUS = Task(minutes=25)
 SHORT = Break(minutes=5)
 LONG = Break(minutes=30, in_menu=True)
-SHORT_BREAK_COUNT = 4
+SHORT_BREAK_COUNT = 3
 DEFAULT_TASKS = [FOCUS, SHORT] * SHORT_BREAK_COUNT + [FOCUS, LONG]
 
 
