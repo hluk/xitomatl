@@ -36,7 +36,9 @@ class App:
 
     def on_state_changed(self):
         self.icon.setIcon(self.pomodoro.current_icon())
-        self.icon.setToolTip(f"Pomodoro: {self.pomodoro}")
+        self.icon.setToolTip(
+            f"{QApplication.applicationName()}: {self.pomodoro}"
+        )
 
         menu = self.icon.contextMenu()
         menu.clear()

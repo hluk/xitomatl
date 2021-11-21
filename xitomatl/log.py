@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: LGPL-2.0-or-later
 import logging
 
-APP_ID = "pomodoro"
+APP_ID = "xitomatl"
 
 log = logging.getLogger(__name__)
 
