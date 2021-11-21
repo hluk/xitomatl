@@ -27,12 +27,12 @@ class App:
         self.menu.addAction("&Stop", self.pomodoro.stop)
 
         self.menu.addSeparator()
-        menu_index = 1
+        number = 0
         for index, task in enumerate(self.pomodoro.tasks):
             if task.in_menu:
-                menu_index += 1
+                number += 1
                 start_task = start_task_callback(self.pomodoro, index)
-                self.menu.addAction(f"&{menu_index}. {task}", start_task)
+                self.menu.addAction(f"&{number}. {task}", start_task)
 
         self.menu.addSeparator()
         self.menu.addAction("&Quit", self.app.quit)
