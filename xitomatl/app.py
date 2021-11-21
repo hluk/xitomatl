@@ -4,6 +4,13 @@ from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 from xitomatl.pomodoro import Pomodoro, State
 
 
+def start_task_callback(pomodoro, index):
+    def start_task():
+        return pomodoro.start_task(index)
+
+    return start_task
+
+
 class App:
     def __init__(self, argv, settings):
         self.app = QApplication(argv)
@@ -18,6 +25,16 @@ class App:
         self.menu.addAction("&Start", self.pomodoro.start)
         self.menu.addAction("&Next", self.pomodoro.next)
         self.menu.addAction("&Stop", self.pomodoro.stop)
+
+        self.menu.addSeparator()
+        menu_index = 1
+        for index, task in enumerate(self.pomodoro.tasks):
+            if task.in_menu:
+                menu_index += 1
+                start_task = start_task_callback(self.pomodoro, index)
+                self.menu.addAction(f"&{menu_index}. {task}", start_task)
+
+        self.menu.addSeparator()
         self.menu.addAction("&Quit", self.app.quit)
 
         self.icon.setContextMenu(self.menu)
@@ -37,6 +54,15 @@ class App:
     def on_state_changed(self):
         self.icon.setIcon(self.pomodoro.current_icon())
         self.icon.setToolTip(f"Pomodoro: {self.pomodoro}")
+
+        index = self.pomodoro.current_task_index + 1
+        prefix = f"&{index}."
+        for act in self.menu.actions():
+            text = act.text()
+            if text.startswith(prefix):
+                act.setText(">" + text)
+            elif text.startswith(">") and not text[1:].startswith(prefix):
+                act.setText(text[1:])
 
     def exec(self):
         return self.app.exec()

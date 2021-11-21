@@ -112,6 +112,12 @@ class Pomodoro:
     def current_task(self):
         return self.tasks[self.current_task_index]
 
+    def start_task(self, index):
+        log.info("[%s] Select start", self)
+        self.state = State.Running
+        self.current_task_index = index
+        self.on_changed()
+
     def stop(self):
         log.info("[%s] Stop", self)
         self.state = State.Stopped
