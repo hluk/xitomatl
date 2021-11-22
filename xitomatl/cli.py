@@ -14,14 +14,7 @@ from xitomatl.app import App
 from xitomatl.log import APP_ID, init_debug_logging, init_logging, log
 
 
-def main():
-    # Force exit app on SIGINT.
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
-
-    QCoreApplication.setOrganizationName(APP_ID)
-    QCoreApplication.setApplicationName(APP_ID)
-    QSettings.setDefaultFormat(QSettings.IniFormat)
-
+def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "-v", "--version", action="version", version=f"%(prog)s {__version__}"
@@ -42,7 +35,18 @@ def main():
         action="store_true",
         help="print debug information",
     )
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+def create_app():
+    # Force exit app on SIGINT.
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+
+    QCoreApplication.setOrganizationName(APP_ID)
+    QCoreApplication.setApplicationName(APP_ID)
+    QSettings.setDefaultFormat(QSettings.IniFormat)
+
+    args = parse_args()
 
     if args.debug:
         init_debug_logging()
@@ -56,7 +60,11 @@ def main():
 
     log.debug("Config: %s", settings.fileName())
 
-    app = App(sys.argv, settings)
+    return App(sys.argv, settings)
+
+
+def main():
+    app = create_app()
     sys.exit(app.exec())
 
 
