@@ -1,7 +1,14 @@
 # SPDX-License-Identifier: LGPL-2.0-or-later
+from PySide6.QtGui import QColor, QIcon, QPixmap
 from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
 from xitomatl.pomodoro import Pomodoro, State
+
+
+def color_icon(color_name):
+    pix = QPixmap(1, 1)
+    pix.fill(QColor(color_name))
+    return QIcon(pix)
 
 
 def start_task_callback(pomodoro, index):
@@ -9,6 +16,24 @@ def start_task_callback(pomodoro, index):
         return pomodoro.start_task(index)
 
     return start_task
+
+
+def in_menu_tasks(tasks):
+    for index, task in enumerate(tasks):
+        if task.in_menu:
+            yield index, task
+
+
+def add_task_actions(menu, pomodoro):
+    actions = {}
+    for number, (index, task) in enumerate(in_menu_tasks(pomodoro.tasks)):
+        text = f"&{number + 1}. {task}"
+        start_task = start_task_callback(pomodoro, index)
+        act = menu.addAction(text, start_task)
+        act.setIcon(color_icon(task.color))
+        actions[index] = act
+
+    return actions
 
 
 class App:
@@ -20,7 +45,18 @@ class App:
 
         self.icon = QSystemTrayIcon()
         self.icon.activated.connect(self.on_activated)
-        self.icon.setContextMenu(QMenu())
+
+        menu = QMenu()
+        menu.addAction("&Start", self.pomodoro.start)
+        menu.addAction("&Next", self.pomodoro.next)
+        menu.addAction("&Stop", self.pomodoro.stop)
+        menu.addSeparator()
+        self.task_actions = add_task_actions(menu, self.pomodoro)
+        menu.addSeparator()
+        menu.addAction("&Quit", self.app.quit)
+        self.icon.setContextMenu(menu)
+
+        self.current_task_index = -1
 
         self.on_state_changed()
         self.icon.show()
@@ -40,25 +76,14 @@ class App:
             f"{QApplication.applicationName()}: {self.pomodoro}"
         )
 
-        menu = self.icon.contextMenu()
-        menu.clear()
-        menu.addAction("&Start", self.pomodoro.start)
-        menu.addAction("&Next", self.pomodoro.next)
-        menu.addAction("&Stop", self.pomodoro.stop)
+        act = self.task_actions.get(self.current_task_index)
+        if act:
+            act.setText(act.text()[2:])
 
-        menu.addSeparator()
-        number = 0
-        for index, task in enumerate(self.pomodoro.tasks):
-            if task.in_menu:
-                number += 1
-                text = f"&{number}. {task}"
-                if index == self.pomodoro.current_task_index:
-                    text = f">{text}"
-                start_task = start_task_callback(self.pomodoro, index)
-                menu.addAction(text, start_task)
-
-        menu.addSeparator()
-        menu.addAction("&Quit", self.app.quit)
+        self.current_task_index = self.pomodoro.current_task_index
+        act = self.task_actions.get(self.current_task_index)
+        if act:
+            act.setText(f"▶ {act.text()}")
 
     def exec(self):
         return self.app.exec()
