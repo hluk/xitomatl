@@ -42,6 +42,7 @@ class Pomodoro:
         self.timer.setSingleShot(True)
         self.timer.setTimerType(Qt.VeryCoarseTimer)
         self.timer.timeout.connect(self.on_timeout)
+        self.finished = True
 
         self.icon_size = int(settings.value("icon_size", ICON_SIZE))
         self.icon_text_size = int(
@@ -90,15 +91,21 @@ class Pomodoro:
                 pad *= 3
                 rect = pix.rect().adjusted(pad, pad, -pad, -pad)
                 painter.drawEllipse(rect)
+            elif self.state == State.Running:
+                remaining = self.remaining_minutes()
+                if remaining > 0:
+                    text_color = task.text_color
+                else:
+                    remaining = -remaining
+                    text_color = task.important_color
 
-            if self.state == State.Running:
-                icon_text = str(self.remaining_minutes())
+                icon_text = str(remaining)
 
                 font = QFont(task.font)
                 font.setPixelSize(self.icon_text_size * self.icon_size / 100)
 
                 painter.setFont(font)
-                painter.setPen(task.text_color)
+                painter.setPen(text_color)
 
                 dx = int(self.icon_text_x * self.icon_size / 100)
                 dy = int(self.icon_text_y * self.icon_size / 100)
@@ -128,10 +135,7 @@ class Pomodoro:
         return int(self.elapsed.elapsed() / 60000)
 
     def remaining_minutes(self):
-        remaining = self.current_task().minutes - self.elapsed_minutes()
-        if remaining < 0:
-            return 0
-        return remaining
+        return self.current_task().minutes - self.elapsed_minutes()
 
     def start(self):
         log.info("[%s] Start", self)
@@ -147,11 +151,7 @@ class Pomodoro:
 
     def finish(self):
         log.info("[%s] Finished", self)
-        self.current_task_index = (self.current_task_index + 1) % len(
-            self.tasks
-        )
-        self.state = State.Stopped
-        self.on_changed()
+        self.finished = True
 
     @property
     def state_changed(self):
@@ -159,15 +159,19 @@ class Pomodoro:
 
     def on_changed(self):
         self.elapsed.restart()
+        self.finished = False
         log.info("[%s]", self)
         self.timer.timeout.emit()
 
     def on_timeout(self):
-        if self.state == State.Running:
-            elapsed = self.elapsed.elapsed()
-            remaining = self.current_task().minutes * 60000 - elapsed
-            if remaining > 0:
-                interval = remaining % 60000 + 1000
-                self.timer.start(interval)
-            else:
-                self.finish()
+        if self.state == State.Stopped:
+            return
+
+        elapsed = self.elapsed.elapsed()
+        remaining = self.current_task().minutes * 60000 - elapsed
+
+        if not self.finished and remaining <= 0:
+            self.finish()
+
+        interval = remaining % 60000 + 1000
+        self.timer.start(interval)

@@ -91,8 +91,17 @@ def test_pomodoro_finish():
     pomodoro = Pomodoro(settings)
 
     pomodoro.start()
+    assert pomodoro.finished is False
     pomodoro.finish()
-    assert pomodoro.current_task_index == 1
-    assert pomodoro.state == State.Stopped
-    assert pomodoro.current_task().name == "break"
-    assert pomodoro.current_task().minutes == 5
+    assert pomodoro.finished is True
+    pomodoro.next()
+    assert pomodoro.finished is False
+
+
+def test_pomodoro_finish_after_timeout():
+    settings = Settings()
+    pomodoro = Pomodoro(settings)
+
+    pomodoro.tasks[0].minutes = 0
+    pomodoro.start()
+    assert pomodoro.finished is True
