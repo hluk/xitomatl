@@ -1,7 +1,14 @@
 # SPDX-License-Identifier: LGPL-2.0-or-later
 from copy import copy
 
+from PySide6.QtGui import QColor
+
 DEFAULT_ICON_FONT = "Overpass ExtraBold"
+DEFAULT_TASK_CACHE_KEY = "__default__"
+
+
+def to_bool(value):
+    return str(value).lower() in ("true", "1", "yes", "on")
 
 
 class Task:
@@ -9,11 +16,16 @@ class Task:
         self,
         name="focus",
         minutes=25,
-        color="#007ba7",
-        text_color="white",
-        important_color="#ff0040",
+        color=QColor("#007ba7"),
+        text_color=QColor("white"),
+        important_color=QColor("#ff0040"),
         font=DEFAULT_ICON_FONT,
         in_menu=True,
+        text_size=65,
+        text_x=0,
+        text_y=15,
+        icon_radius=30,
+        icon_padding=10,
     ):
         self.minutes = minutes
         self.name = name
@@ -22,6 +34,11 @@ class Task:
         self.important_color = important_color
         self.font = font
         self.in_menu = in_menu
+        self.text_size = text_size
+        self.text_x = text_x
+        self.text_y = text_y
+        self.icon_radius = icon_radius
+        self.icon_padding = icon_padding
 
     def __str__(self):
         return f"{self.name}/{self.minutes}"
@@ -32,38 +49,41 @@ class Break(Task):
         super().__init__(
             name="break",
             minutes=minutes,
-            color="#de3163",
-            text_color="white",
-            important_color="#ffbf00",
+            color=QColor("#de3163"),
+            text_color=QColor("white"),
+            important_color=QColor("#ffbf00"),
             in_menu=in_menu,
+            icon_radius=100,
+            text_y=0,
         )
-
-
-FOCUS = Task(minutes=25)
-SHORT = Break(minutes=5)
-LONG = Break(minutes=30, in_menu=True)
-SHORT_BREAK_COUNT = 3
-DEFAULT_TASKS = [FOCUS, SHORT] * SHORT_BREAK_COUNT + [FOCUS, LONG]
 
 
 def read_task(index, settings, task_cache):
     settings.setArrayIndex(index)
     name = settings.value("name", "focus")
-    task = task_cache.setdefault(name, Task(name))
-    KEYS = [
-        "minutes",
-        "color",
-        "text_color",
-        "important_color",
-        "font",
-        "in_menu",
-    ]
-    for k in KEYS:
-        v = settings.value(k)
-        if v:
-            setattr(task, k, v)
-    task.minutes = int(task.minutes)
-    task.in_menu = str(task.in_menu).lower() in ("true", "1", "yes", "on")
+    default_task = task_cache[DEFAULT_TASK_CACHE_KEY]
+    default_task.name = name
+    task = task_cache.setdefault(name, default_task)
+
+    KEYS = (
+        ("minutes", int),
+        ("color", QColor),
+        ("text_color", QColor),
+        ("important_color", QColor),
+        ("font", str),
+        ("in_menu", to_bool),
+        ("text_size", int),
+        ("text_x", int),
+        ("text_y", int),
+        ("icon_radius", int),
+        ("icon_padding", int),
+    )
+    for key, convert in KEYS:
+        value = settings.value(key)
+        if value:
+            setattr(task, key, convert(value))
+
+    task_cache[DEFAULT_TASK_CACHE_KEY] = copy(task)
     return copy(task)
 
 
@@ -73,6 +93,7 @@ def read_tasks(settings):
         if task_count == 0:
             return []
         task_cache = {task.name: task for task in (Task(), Break())}
+        task_cache[DEFAULT_TASK_CACHE_KEY] = Task()
         return [
             read_task(index, settings, task_cache)
             for index in range(task_count)

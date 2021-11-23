@@ -2,18 +2,21 @@
 import os
 
 from PySide6.QtCore import QElapsedTimer, Qt, QTimer
-from PySide6.QtGui import QColor, QFont, QIcon, QPainter, QPen, QPixmap
+from PySide6.QtGui import QFont, QIcon, QPainter, QPixmap
 
 from xitomatl.log import log
-from xitomatl.tasks import DEFAULT_TASKS, read_tasks
+from xitomatl.tasks import Break, Task, read_tasks, to_bool
 
 DIR = os.path.abspath(os.path.dirname(__file__))
 ICON_SIZE = 32
-ICON_TEXT_SIZE = 65
-ICON_TEXT_X = 0
-ICON_TEXT_Y = 15
-ICON_RADIUS = 30
-ICON_PADDING = 10
+
+
+def default_pomodoro_tasks():
+    focus = Task(minutes=25)
+    short_break = Break(minutes=5)
+    long_break = Break(minutes=30, in_menu=True)
+    short_break_count = 3
+    return [focus, short_break] * short_break_count + [focus, long_break]
 
 
 class State:
@@ -26,7 +29,7 @@ class Pomodoro:
         self.state = State.Stopped
 
         try:
-            self.tasks = read_tasks(settings) or DEFAULT_TASKS
+            self.tasks = read_tasks(settings) or default_pomodoro_tasks()
         except Exception:
             log.exception(
                 "Failed to read [tasks] from configuration file %s",
@@ -45,18 +48,11 @@ class Pomodoro:
         self.finished = True
 
         self.icon_size = int(settings.value("icon_size", ICON_SIZE))
-        self.icon_text_size = int(
-            settings.value("icon_text_size", ICON_TEXT_SIZE)
-        )
-        self.icon_radius = int(settings.value("icon_radius", ICON_RADIUS))
-        self.icon_padding = int(settings.value("icon_padding", ICON_PADDING))
-        self.icon_text_x = int(settings.value("icon_text_x", ICON_TEXT_X))
-        self.icon_text_y = int(settings.value("icon_text_y", ICON_TEXT_Y))
 
         log.info("[%s] Initialized", self)
 
         autostart = settings.value("autostart", "true")
-        if autostart.lower() in ("true", "1", "yes", "on"):
+        if to_bool(autostart):
             self.start()
 
     def __str__(self):
@@ -76,22 +72,18 @@ class Pomodoro:
             painter = QPainter(pix)
             painter.setRenderHint(QPainter.TextAntialiasing)
             painter.setRenderHint(QPainter.Antialiasing)
-            pen = QPen(Qt.transparent)
-            pen.setWidth(0)
-            painter.setPen(pen)
 
-            pad = int(self.icon_padding * self.icon_size / 100)
             task = self.current_task()
-            color = QColor(task.color)
-            painter.setBrush(color)
+
+            pad = int(task.icon_padding * self.icon_size / 100)
+            painter.setBrush(task.color)
             rect = pix.rect().adjusted(pad, pad, -pad, -pad)
             painter.drawRoundedRect(
-                rect, self.icon_radius, self.icon_radius, Qt.RelativeSize
+                rect, task.icon_radius, task.icon_radius, Qt.RelativeSize
             )
 
             if self.state == State.Stopped:
-                color = QColor(task.important_color)
-                painter.setBrush(color)
+                painter.setBrush(task.important_color)
                 pad *= 3
                 rect = pix.rect().adjusted(pad, pad, -pad, -pad)
                 painter.drawEllipse(rect)
@@ -106,13 +98,13 @@ class Pomodoro:
                 icon_text = str(remaining)
 
                 font = QFont(task.font)
-                font.setPixelSize(self.icon_text_size * self.icon_size / 100)
+                font.setPixelSize(task.text_size * self.icon_size / 100)
 
                 painter.setFont(font)
                 painter.setPen(text_color)
 
-                dx = int(self.icon_text_x * self.icon_size / 100)
-                dy = int(self.icon_text_y * self.icon_size / 100)
+                dx = int(task.text_x * self.icon_size / 100)
+                dy = int(task.text_y * self.icon_size / 100)
                 rect = pix.rect().adjusted(dx, dy, dx, dy)
                 painter.drawText(rect, Qt.AlignCenter, icon_text)
         finally:
