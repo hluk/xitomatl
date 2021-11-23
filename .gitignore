@@ -1,4 +1,8 @@
 /.*
+!/.github
 !/.gitignore
 !/.pre-commit-config.yaml
 !/.pylintrc
+
+/xitomatl.build/
+/xitomatl.dist/

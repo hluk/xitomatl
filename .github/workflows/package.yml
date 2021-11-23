@@ -1,0 +1,127 @@
+---
+name: package
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - master
+      - nuitka
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: ${{ matrix.buildname }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - windows-latest
+          - macos-latest
+          - ubuntu-latest
+
+        python-version:
+          - 3.9
+
+        poetry-version:
+          - 1.1.11
+
+        include:
+          - os: windows-latest
+            buildname: Windows
+            artifact-name: xitomatl for Windows
+            artifact-file: xitomatl.exe
+            nuitka-arguments: --windows-icon-from-ico=xitomatl.png
+
+          - os: macos-latest
+            buildname: macOS
+            artifact-name: xitomatl for macOS
+            artifact-file: xitomatl.bin
+            nuitka-arguments: --macos-onefile-icon=xitomatl.png
+
+          - os: ubuntu-latest
+            buildname: Linux
+            artifact-name: xitomatl for Linux
+            artifact-file: xitomatl.bin
+            nuitka-arguments: --linux-onefile-icon=xitomatl.png
+
+    env:
+      qt: '6.2.1'
+
+    steps:
+      - name: Restore Qt cache
+        uses: actions/cache@v2
+        id: cache-qt
+        with:
+          path: ${{ runner.workspace }}/Qt/${{ env.qt }}
+          key: ${{ runner.os }}-qt-${{ env.qt }}
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: ${{ env.qt }}
+          dir: ${{ runner.workspace }}
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+
+      - name: Checkout source code
+        uses: actions/checkout@v2
+        with:
+          submodules: false
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Use Poetry
+        uses: Gr1N/setup-poetry@v7
+        with:
+          poetry-version: ${{ matrix.poetry-version }}
+
+      - name: Restore Poetry cache
+        uses: actions/cache@v2
+        id: cache-poetry
+        with:
+          path: ${{ runner.workspace }}/venv
+          key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-poetry-
+
+      - name: Install dependencies
+        env:
+          POETRY_VIRTUALENVS_PATH: ${{ runner.workspace }}/venv
+        run: poetry install --no-root --no-interaction
+
+      - name: Restore Nuitka cache
+        uses: actions/cache@v2
+        id: cache-nuitka
+        with:
+          path: ${{ runner.workspace }}/Nuitka
+          key: ${{ runner.os }}-nuitka
+
+      - name: Create package
+        env:
+          POETRY_VIRTUALENVS_PATH: ${{ runner.workspace }}/venv
+          NUITKA_CACHE_DIR: ${{ runner.workspace }}/Nuitka
+        run: >-
+          poetry run nuitka3
+          --onefile
+          --standalone
+          --assume-yes-for-downloads
+          --plugin-enable=pyside6
+          ${{ matrix.nuitka-arguments }}
+          xitomatl
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: ${{ matrix.artifact-file }}
+
+      - name: Run tests
+        env:
+          POETRY_VIRTUALENVS_PATH: ${{ runner.workspace }}/venv
+        run: poetry run pytest
