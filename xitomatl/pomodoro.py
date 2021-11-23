@@ -5,7 +5,7 @@ from PySide6.QtGui import QFont, QIcon, QPainter, QPixmap
 from xitomatl.log import log
 from xitomatl.tasks import Break, Task, read_tasks, to_bool
 
-ICON_SIZE = 32
+ICON_SIZE = 64
 SHORT_BREAK_COUNT = 3
 
 
