@@ -55,6 +55,10 @@ class Pomodoro:
 
         log.info("[%s] Initialized", self)
 
+        autostart = settings.value("autostart", "true")
+        if autostart.lower() in ("true", "1", "yes", "on"):
+            self.start()
+
     def __str__(self):
         state = "⏸︎" if self.state == State.Stopped else "⏵︎"
         return (

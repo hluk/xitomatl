@@ -3,14 +3,11 @@ from xitomatl.tasks import SHORT_BREAK_COUNT
 
 
 class Settings:
-    def __init__(self, values=None):
-        if values is None:
-            self.values = {}
-        else:
-            self.values = values
+    def __init__(self, **kwargs):
+        self.values = kwargs
 
     def value(self, key, default=None):
-        return default
+        return self.values.get(key, default)
 
     def beginReadArray(self, _key):
         return 0
@@ -26,7 +23,7 @@ def test_pomodoro_init():
     settings = Settings()
     pomodoro = Pomodoro(settings)
 
-    assert pomodoro.state == State.Stopped
+    assert pomodoro.state == State.Running
     assert pomodoro.current_task().name == "focus"
     assert pomodoro.current_task().minutes == 25
 
@@ -37,25 +34,26 @@ def test_pomodoro_next():
 
     for i in range(SHORT_BREAK_COUNT):
         pomodoro.next()
-        assert pomodoro.state == State.Stopped
+        assert pomodoro.state == State.Running
         assert pomodoro.current_task().name == "break"
         assert pomodoro.current_task().minutes == 5
 
         pomodoro.next()
-        assert pomodoro.state == State.Stopped
+        assert pomodoro.state == State.Running
         assert pomodoro.current_task().name == "focus"
         assert pomodoro.current_task().minutes == 25
 
     pomodoro.next()
-    assert pomodoro.state == State.Stopped
+    assert pomodoro.state == State.Running
     assert pomodoro.current_task().name == "break"
     assert pomodoro.current_task().minutes == 30
 
 
 def test_pomodoro_start():
-    settings = Settings()
+    settings = Settings(autostart="0")
     pomodoro = Pomodoro(settings)
 
+    assert pomodoro.state == State.Stopped
     pomodoro.start()
     assert pomodoro.state == State.Running
     assert pomodoro.current_task().name == "focus"
