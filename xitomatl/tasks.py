@@ -34,7 +34,7 @@ class Break(Task):
             minutes=minutes,
             color="#de3163",
             text_color="white",
-            important_color="white",
+            important_color="#ffbf00",
             in_menu=in_menu,
         )
 
