@@ -1,22 +1,18 @@
-from xitomatl.pomodoro import Pomodoro, State
-from xitomatl.tasks import SHORT_BREAK_COUNT
+from unittest.mock import Mock
+
+from xitomatl.pomodoro import SHORT_BREAK_COUNT, Pomodoro, State
 
 
-class Settings:
+class Settings(Mock):
     def __init__(self, **kwargs):
+        super().__init__()
         self.values = kwargs
 
     def value(self, key, default=None):
         return self.values.get(key, default)
 
-    def beginReadArray(self, _key):
-        return 0
-
-    def endArray(self):
-        pass
-
-    def fileName(self):
-        return "fake.ini"
+    def childKeys(self):
+        return []
 
 
 def test_pomodoro_init():

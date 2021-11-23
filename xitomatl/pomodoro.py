@@ -1,22 +1,19 @@
 # SPDX-License-Identifier: LGPL-2.0-or-later
-import os
-
 from PySide6.QtCore import QElapsedTimer, Qt, QTimer
 from PySide6.QtGui import QFont, QIcon, QPainter, QPixmap
 
 from xitomatl.log import log
 from xitomatl.tasks import Break, Task, read_tasks, to_bool
 
-DIR = os.path.abspath(os.path.dirname(__file__))
 ICON_SIZE = 32
+SHORT_BREAK_COUNT = 3
 
 
 def default_pomodoro_tasks():
     focus = Task(minutes=25)
     short_break = Break(minutes=5)
     long_break = Break(minutes=30, in_menu=True)
-    short_break_count = 3
-    return [focus, short_break] * short_break_count + [focus, long_break]
+    return [focus, short_break] * SHORT_BREAK_COUNT + [focus, long_break]
 
 
 class State:

@@ -58,8 +58,7 @@ class Break(Task):
         )
 
 
-def read_task(index, settings, task_cache):
-    settings.setArrayIndex(index)
+def read_task(settings, task_cache):
     name = settings.value("name", "focus")
     default_task = task_cache[DEFAULT_TASK_CACHE_KEY]
     default_task.name = name
@@ -89,14 +88,16 @@ def read_task(index, settings, task_cache):
 
 def read_tasks(settings):
     try:
-        task_count = settings.beginReadArray("tasks")
-        if task_count == 0:
-            return []
         task_cache = {task.name: task for task in (Task(), Break())}
         task_cache[DEFAULT_TASK_CACHE_KEY] = Task()
-        return [
-            read_task(index, settings, task_cache)
-            for index in range(task_count)
-        ]
+        tasks = []
+
+        settings.beginReadArray("tasks")
+        settings.setArrayIndex(0)
+        while settings.childKeys():
+            tasks.append(read_task(settings, task_cache))
+            settings.setArrayIndex(len(tasks))
+
+        return tasks
     finally:
         settings.endArray()
