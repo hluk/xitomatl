@@ -117,6 +117,10 @@ jobs:
           ${{ matrix.nuitka-arguments }}
           xitomatl
 
+      - name: List package files
+        shell: bash
+        run: ls -lSh xitomatl.dist
+
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
