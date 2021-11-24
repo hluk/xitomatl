@@ -95,7 +95,7 @@ class Pomodoro:
                 icon_text = str(remaining)
 
                 font = QFont(task.font)
-                font.setPixelSize(task.text_size * self.icon_size / 100)
+                font.setPixelSize(task.text_size * self.icon_size // 100)
 
                 painter.setFont(font)
                 painter.setPen(text_color)
