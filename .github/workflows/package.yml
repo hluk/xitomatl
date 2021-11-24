@@ -78,6 +78,19 @@ jobs:
           POETRY_VIRTUALENVS_PATH: ${{ runner.workspace }}/venv
         run: poetry install --no-root --no-interaction
 
+      - name: (Linux) Install runtime dependencies
+        if: runner.os == 'Linux'
+        uses: nick-invision/retry@v2
+        with:
+          timeout_minutes: 10
+          retry_wait_seconds: 30
+          max_attempts: 3
+          command: >-
+            sudo apt-get update &&
+            sudo apt-get install
+            libegl1
+            libopengl0
+
       - name: Restore Nuitka cache
         uses: actions/cache@v2
         id: cache-nuitka
