@@ -114,6 +114,8 @@ jobs:
           --standalone
           --assume-yes-for-downloads
           --plugin-enable=pyside6
+          --show-modules
+          --show-scons
           ${{ matrix.nuitka-arguments }}
           xitomatl
 
