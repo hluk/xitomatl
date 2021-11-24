@@ -95,6 +95,7 @@ jobs:
           poetry run nuitka3
           --onefile
           --standalone
+          --python-flag=no_site
           --assume-yes-for-downloads
           --plugin-enable=pyside6
           --show-modules
