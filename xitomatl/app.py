@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: LGPL-2.0-or-later
-from PySide6.QtGui import QColor, QIcon, QPixmap
-from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
+from PyQt5.QtGui import QColor, QIcon, QPixmap
+from PyQt5.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
 from xitomatl.pomodoro import Pomodoro, State
 

@@ -7,7 +7,7 @@ import argparse
 import signal
 import sys
 
-from PySide6.QtCore import QCoreApplication, QSettings
+from PyQt5.QtCore import QCoreApplication, QSettings
 
 from xitomatl import __version__
 from xitomatl.app import App

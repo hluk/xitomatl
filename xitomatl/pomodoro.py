@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: LGPL-2.0-or-later
 from contextlib import contextmanager
 
-from PySide6.QtCore import QElapsedTimer, QPoint, Qt, QTimer
-from PySide6.QtGui import QColor, QFont, QFontMetrics, QIcon, QPainter, QPixmap
+from PyQt5.QtCore import QElapsedTimer, QPoint, Qt, QTimer
+from PyQt5.QtGui import QColor, QFont, QFontMetrics, QIcon, QPainter, QPixmap
 
 from xitomatl.log import log
 from xitomatl.tasks import (

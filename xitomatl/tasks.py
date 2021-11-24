@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: LGPL-2.0-or-later
 from copy import copy
 
-from PySide6.QtGui import QColor
+from PyQt5.QtGui import QColor
 
 DEFAULT_ICON_FONT = "Noto Sans Mono Condensed ExtraBold"
 DEFAULT_TASK_CACHE_KEY = "__default__"
