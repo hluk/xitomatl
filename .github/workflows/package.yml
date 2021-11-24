@@ -99,7 +99,9 @@ jobs:
         uses: actions/cache@v2
         id: cache-nuitka
         with:
-          path: ${{ runner.workspace }}/Nuitka
+          path: |
+            ~\AppData\Local\Nuitka\Nuitka
+            ${{ runner.workspace }}/Nuitka
           key: ${{ runner.os }}-nuitka
 
       - name: Create package
