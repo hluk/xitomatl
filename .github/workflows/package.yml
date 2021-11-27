@@ -1,4 +1,5 @@
 ---
+# yamllint disable rule:line-length
 name: package
 
 # yamllint disable-line rule:truthy
@@ -58,6 +59,12 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Get full python version
+        id: full-python-version
+        shell: bash
+        run: |
+          echo ::set-output name=version::$(python -c "import sys; print('-'.join(str(v) for v in sys.version_info[:3]))")
+
       - name: Use Poetry
         uses: Gr1N/setup-poetry@v7
         with:
@@ -68,7 +75,7 @@ jobs:
         id: cache-poetry
         with:
           path: ${{ runner.workspace }}/venv
-          key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
+          key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}-${{ steps.full-python-version.outputs.version }}
           restore-keys: |
             ${{ runner.os }}-poetry-
 
