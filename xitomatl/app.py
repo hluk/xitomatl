@@ -47,13 +47,23 @@ class App:
         self.icon.activated.connect(self.on_activated)
 
         menu = QMenu()
-        menu.addAction("&Start", self.pomodoro.start)
-        menu.addAction("&Next", self.pomodoro.next)
-        menu.addAction("&Stop", self.pomodoro.stop)
+        menu.addAction(
+            QIcon.fromTheme("media-playback-start"),
+            "&Start",
+            self.pomodoro.start,
+        )
+        menu.addAction(
+            QIcon.fromTheme("media-skip-forward"), "&Next", self.pomodoro.next
+        )
+        menu.addAction(
+            QIcon.fromTheme("media-playback-stop"), "&Stop", self.pomodoro.stop
+        )
         menu.addSeparator()
         self.task_actions = add_task_actions(menu, self.pomodoro)
         menu.addSeparator()
-        menu.addAction("&Quit", self.app.quit)
+        menu.addAction(
+            QIcon.fromTheme("application-exit"), "&Quit", self.app.quit
+        )
         self.icon.setContextMenu(menu)
 
         self.current_task_index = -1
