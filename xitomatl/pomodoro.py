@@ -150,10 +150,13 @@ class Pomodoro:
                 painter.setFont(font)
                 painter.setPen(text_color)
 
-                dx = task.text_x * self.icon_size // 100
-                dy = task.text_y * self.icon_size // 100
-                rect = pix.rect().adjusted(dx, dy, dx, dy)
-                painter.drawText(rect, Qt.AlignCenter, icon_text)
+                rect = painter.boundingRect(pix.rect(), icon_text)
+                w = rect.width()
+                h = rect.height()
+                dx = (width - w) / 2 + task.text_x * width / 100
+                dy = (height - h) / 2 + task.text_y * height / 100
+                rect = rect.adjusted(dx, dy, dx, dy).toRect()
+                painter.drawText(rect, icon_text)
         finally:
             painter.end()
 

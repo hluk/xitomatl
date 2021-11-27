@@ -3,7 +3,7 @@ from copy import copy
 
 from PySide6.QtGui import QColor
 
-DEFAULT_ICON_FONT = "Overpass ExtraBold"
+DEFAULT_ICON_FONT = "Noto Sans Mono Condensed ExtraBold"
 DEFAULT_TASK_CACHE_KEY = "__default__"
 
 
@@ -24,7 +24,7 @@ class Task:
         in_menu=True,
         text_size=65,
         text_x=0,
-        text_y=15,
+        text_y=0,
         icon_radius=30,
         icon_padding=10,
     ):
