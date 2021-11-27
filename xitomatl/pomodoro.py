@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: LGPL-2.0-or-later
 from contextlib import contextmanager
 
-from PySide6.QtCore import QElapsedTimer, Qt, QTimer
-from PySide6.QtGui import QColor, QFont, QIcon, QPainter, QPixmap
+from PySide6.QtCore import QElapsedTimer, QPoint, Qt, QTimer
+from PySide6.QtGui import QColor, QFont, QFontMetrics, QIcon, QPainter, QPixmap
 
 from xitomatl.log import log
 from xitomatl.tasks import (
@@ -150,13 +150,21 @@ class Pomodoro:
                 painter.setFont(font)
                 painter.setPen(text_color)
 
-                rect = painter.boundingRect(pix.rect(), icon_text)
-                w = rect.width()
-                h = rect.height()
-                dx = (width - w) / 2 + task.text_x * width / 100
-                dy = (height - h) / 2 + task.text_y * height / 100
-                rect = rect.adjusted(dx, dy, dx, dy).toRect()
-                painter.drawText(rect, icon_text)
+                metrics = QFontMetrics(font)
+                rect = metrics.tightBoundingRect(icon_text)
+                bottom_left = rect.bottomLeft()
+                x = (
+                    (width - rect.width()) / 2
+                    + task.text_x * width / 100
+                    - bottom_left.x()
+                )
+                y = (
+                    (height - rect.height()) / 2
+                    + task.text_y * height / 100
+                    - bottom_left.y()
+                )
+                pos = QPoint(x, height - y)
+                painter.drawText(pos, icon_text)
         finally:
             painter.end()
 
