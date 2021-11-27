@@ -19,6 +19,7 @@ class Task:
         color=QColor("#007ba7"),
         text_color=QColor("white"),
         important_color=QColor("#ff0040"),
+        important_text_color=QColor("white"),
         font=DEFAULT_ICON_FONT,
         in_menu=True,
         text_size=65,
@@ -32,6 +33,7 @@ class Task:
         self.color = color
         self.text_color = text_color
         self.important_color = important_color
+        self.important_text_color = important_text_color
         self.font = font
         self.in_menu = in_menu
         self.text_size = text_size
@@ -52,6 +54,7 @@ class Break(Task):
             color=QColor("#de3163"),
             text_color=QColor("white"),
             important_color=QColor("#ffbf00"),
+            important_text_color=QColor("black"),
             in_menu=in_menu,
             icon_radius=100,
             text_y=0,

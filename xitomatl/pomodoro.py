@@ -29,7 +29,7 @@ def default_stopped_task():
     return Task(
         name="stopped",
         color=QColor("#ff0040"),
-        important_color=QColor("white"),
+        text_color=QColor("white"),
     )
 
 
@@ -120,26 +120,28 @@ class Pomodoro:
 
             task = self.current_task()
 
+            color = task.color
+            text_color = task.text_color
+            if self.state == State.Running:
+                remaining = self.remaining_minutes()
+                if remaining <= 0:
+                    remaining = -remaining
+                    color = task.important_color
+                    text_color = task.important_text_color
+
             pad = task.icon_padding * self.icon_size // 100
-            painter.setBrush(task.color)
+            painter.setBrush(color)
             rect = pix.rect().adjusted(pad, pad, -pad, -pad)
             painter.drawRoundedRect(
                 rect, task.icon_radius, task.icon_radius, Qt.RelativeSize
             )
 
             if self.state == State.Stopped:
-                painter.setBrush(task.important_color)
+                painter.setBrush(text_color)
                 pad *= 3
                 rect = pix.rect().adjusted(pad, pad, -pad, -pad)
                 painter.drawRect(rect)
             elif self.state == State.Running:
-                remaining = self.remaining_minutes()
-                if remaining > 0:
-                    text_color = task.text_color
-                else:
-                    remaining = -remaining
-                    text_color = task.important_color
-
                 icon_text = str(remaining)
 
                 font = QFont(task.font)
