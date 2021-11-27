@@ -1,8 +1,10 @@
 # SPDX-License-Identifier: LGPL-2.0-or-later
 from contextlib import contextmanager
 
-from PySide6.QtCore import QElapsedTimer, QPoint, Qt, QTimer
-from PySide6.QtGui import QColor, QFont, QFontMetrics, QIcon, QPainter, QPixmap
+from PySide6.QtCore import QElapsedTimer, Qt, QTimer, QUrl
+from PySide6.QtGui import QColor, QIcon, QPixmap
+from PySide6.QtQml import QQmlComponent
+from PySide6.QtQuick import QQuickView
 
 from xitomatl.log import log
 from xitomatl.tasks import (
@@ -16,6 +18,40 @@ from xitomatl.tasks import (
 
 ICON_SIZE = 64
 SHORT_BREAK_COUNT = 3
+
+DEFAULT_ICON_QML = """
+import QtQuick 2.0
+Item {
+  width: icon_size
+  height: icon_size
+  Rectangle {
+    color: icon_color
+    width: parent.width - icon_padding * 2
+    height: parent.height - icon_padding * 2
+    radius: icon_radius
+    anchors.centerIn: parent
+
+    Text {
+      visible: task_running
+      color: text_color
+      text: icon_text
+      font.family: icon_font
+      font.pixelSize: icon_font_size
+      anchors.fill: parent
+      horizontalAlignment: Text.AlignHCenter
+      verticalAlignment: Text.AlignVCenter
+    }
+
+    Rectangle {
+      visible: !task_running
+      width: parent.width - icon_padding * 3
+      height: parent.height - icon_padding * 3
+      color: text_color
+      anchors.centerIn: parent
+    }
+  }
+}
+"""
 
 
 def default_pomodoro_tasks():
@@ -99,6 +135,22 @@ class Pomodoro:
         if to_bool(autostart):
             self.start()
 
+        self.quick_view = QQuickView()
+        self.quick_view.setProperty("color", "transparent")
+        self.quick_view.resize(self.icon_size, self.icon_size)
+        context = self.quick_view.rootContext()
+        context.setContextProperty("icon_size", self.icon_size)
+        self._update()
+
+        icon_qml = settings.value("icon_qml", DEFAULT_ICON_QML).encode("utf-8")
+        component = QQmlComponent(self.quick_view.engine())
+        component.setData(icon_qml, QUrl())
+        self.quick_item = component.create(context)
+        if not self.quick_item:
+            raise RuntimeError(component.errorString())
+
+        self.quick_view.setContent(QUrl(), component, self.quick_item)
+
     def __str__(self):
         state = "⏸︎" if self.state == State.Stopped else "⏵︎"
         return (
@@ -107,67 +159,48 @@ class Pomodoro:
             f" {self.elapsed_minutes()}m {state}"
         )
 
+    def _update(self):
+        task = self.current_task()
+
+        color = task.color
+        text_color = task.text_color
+        remaining = ""
+        if self.state == State.Running:
+            remaining = self.remaining_minutes()
+            if remaining <= 0:
+                remaining = -remaining
+                color = task.important_color
+                text_color = task.important_text_color
+
+        context = self.quick_view.rootContext()
+        context.setContextProperty("task_name", task.name)
+        context.setContextProperty("icon_font", task.font)
+        context.setContextProperty("icon_color", color)
+        context.setContextProperty("text_color", text_color)
+        context.setContextProperty("icon_text", remaining)
+        context.setContextProperty(
+            "icon_font_size", task.text_size * self.icon_size // 100
+        )
+        context.setContextProperty(
+            "text_x", task.text_x * self.icon_size // 100
+        )
+        context.setContextProperty(
+            "text_y", task.text_y * self.icon_size // 100
+        )
+        context.setContextProperty(
+            "icon_radius", task.icon_radius * self.icon_size // 200
+        )
+        context.setContextProperty(
+            "icon_padding", task.icon_padding * self.icon_size // 100
+        )
+        context.setContextProperty("task_running", self.state == State.Running)
+
     def current_icon(self):
-        width = self.icon_size
-        height = self.icon_size
-        pix = QPixmap(width, height)
-        pix.fill(Qt.transparent)
-        try:
-            painter = QPainter(pix)
-            painter.setRenderHint(QPainter.TextAntialiasing)
-            painter.setRenderHint(QPainter.Antialiasing)
-            painter.setPen(Qt.transparent)
-
-            task = self.current_task()
-
-            color = task.color
-            text_color = task.text_color
-            if self.state == State.Running:
-                remaining = self.remaining_minutes()
-                if remaining <= 0:
-                    remaining = -remaining
-                    color = task.important_color
-                    text_color = task.important_text_color
-
-            pad = task.icon_padding * self.icon_size // 100
-            painter.setBrush(color)
-            rect = pix.rect().adjusted(pad, pad, -pad, -pad)
-            painter.drawRoundedRect(
-                rect, task.icon_radius, task.icon_radius, Qt.RelativeSize
-            )
-
-            if self.state == State.Stopped:
-                painter.setBrush(text_color)
-                pad *= 3
-                rect = pix.rect().adjusted(pad, pad, -pad, -pad)
-                painter.drawRect(rect)
-            elif self.state == State.Running:
-                icon_text = str(remaining)
-
-                font = QFont(task.font)
-                font.setPixelSize(task.text_size * self.icon_size // 100)
-
-                painter.setFont(font)
-                painter.setPen(text_color)
-
-                metrics = QFontMetrics(font)
-                rect = metrics.tightBoundingRect(icon_text)
-                bottom_left = rect.bottomLeft()
-                x = (
-                    (width - rect.width()) / 2
-                    + task.text_x * width / 100
-                    - bottom_left.x()
-                )
-                y = (
-                    (height - rect.height()) / 2
-                    + task.text_y * height / 100
-                    - bottom_left.y()
-                )
-                pos = QPoint(x, height - y)
-                painter.drawText(pos, icon_text)
-        finally:
-            painter.end()
-
+        self._update()
+        image = self.quick_view.grabWindow().copy(
+            0, 0, self.icon_size, self.icon_size
+        )
+        pix = QPixmap.fromImage(image)
         return QIcon(pix)
 
     def current_task(self):
