@@ -1,9 +1,18 @@
 # SPDX-License-Identifier: LGPL-2.0-or-later
+from contextlib import contextmanager
+
 from PySide6.QtCore import QElapsedTimer, Qt, QTimer
-from PySide6.QtGui import QFont, QIcon, QPainter, QPixmap
+from PySide6.QtGui import QColor, QFont, QIcon, QPainter, QPixmap
 
 from xitomatl.log import log
-from xitomatl.tasks import Break, Task, read_tasks, to_bool
+from xitomatl.tasks import (
+    DEFAULT_TASK_CACHE_KEY,
+    Break,
+    Task,
+    read_task,
+    read_tasks,
+    to_bool,
+)
 
 ICON_SIZE = 64
 SHORT_BREAK_COUNT = 3
@@ -16,6 +25,46 @@ def default_pomodoro_tasks():
     return [focus, short_break] * SHORT_BREAK_COUNT + [focus, long_break]
 
 
+def default_stopped_task():
+    return Task(
+        name="stopped",
+        color=QColor("#ff0040"),
+        important_color=QColor("white"),
+    )
+
+
+@contextmanager
+def readArray(settings, name):
+    try:
+        settings.beginReadArray(name)
+        yield
+    except Exception:
+        log.exception(
+            "Failed to read [%s] from configuration file %s",
+            name,
+            settings.fileName(),
+        )
+        raise
+    finally:
+        settings.endArray()
+
+
+@contextmanager
+def enterGroup(settings, name):
+    try:
+        settings.beginGroup(name)
+        yield
+    except Exception:
+        log.exception(
+            "Failed to read [%s] from configuration file %s",
+            name,
+            settings.fileName(),
+        )
+        raise
+    finally:
+        settings.endGroup()
+
+
 class State:
     Stopped = 0
     Running = 1
@@ -25,14 +74,12 @@ class Pomodoro:
     def __init__(self, settings):
         self.state = State.Stopped
 
-        try:
+        with readArray(settings, "tasks"):
             self.tasks = read_tasks(settings) or default_pomodoro_tasks()
-        except Exception:
-            log.exception(
-                "Failed to read [tasks] from configuration file %s",
-                settings.fileName(),
-            )
-            raise
+
+        with enterGroup(settings, "stopped"):
+            task_cache = {DEFAULT_TASK_CACHE_KEY: default_stopped_task()}
+            self.stopped_task = read_task(settings, task_cache)
 
         self.current_task_index = 0
         self.elapsed = QElapsedTimer()
@@ -69,10 +116,11 @@ class Pomodoro:
             painter = QPainter(pix)
             painter.setRenderHint(QPainter.TextAntialiasing)
             painter.setRenderHint(QPainter.Antialiasing)
+            painter.setPen(Qt.transparent)
 
             task = self.current_task()
 
-            pad = int(task.icon_padding * self.icon_size / 100)
+            pad = task.icon_padding * self.icon_size // 100
             painter.setBrush(task.color)
             rect = pix.rect().adjusted(pad, pad, -pad, -pad)
             painter.drawRoundedRect(
@@ -83,7 +131,7 @@ class Pomodoro:
                 painter.setBrush(task.important_color)
                 pad *= 3
                 rect = pix.rect().adjusted(pad, pad, -pad, -pad)
-                painter.drawEllipse(rect)
+                painter.drawRect(rect)
             elif self.state == State.Running:
                 remaining = self.remaining_minutes()
                 if remaining > 0:
@@ -100,8 +148,8 @@ class Pomodoro:
                 painter.setFont(font)
                 painter.setPen(text_color)
 
-                dx = int(task.text_x * self.icon_size / 100)
-                dy = int(task.text_y * self.icon_size / 100)
+                dx = task.text_x * self.icon_size // 100
+                dy = task.text_y * self.icon_size // 100
                 rect = pix.rect().adjusted(dx, dy, dx, dy)
                 painter.drawText(rect, Qt.AlignCenter, icon_text)
         finally:
@@ -110,7 +158,10 @@ class Pomodoro:
         return QIcon(pix)
 
     def current_task(self):
-        return self.tasks[self.current_task_index]
+        if self.state == State.Running:
+            return self.tasks[self.current_task_index]
+
+        return self.stopped_task
 
     def start_task(self, index):
         log.info("[%s] Select start", self)

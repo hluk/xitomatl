@@ -24,6 +24,9 @@ repos:
         entry: poetry run isort
         language: system
         types_or: [python]
+        args:
+          - --line-length=79
+          - --profile=black
 
   - repo: local
     hooks:

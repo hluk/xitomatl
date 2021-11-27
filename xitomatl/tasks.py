@@ -87,17 +87,13 @@ def read_task(settings, task_cache):
 
 
 def read_tasks(settings):
-    try:
-        task_cache = {task.name: task for task in (Task(), Break())}
-        task_cache[DEFAULT_TASK_CACHE_KEY] = Task()
-        tasks = []
+    task_cache = {task.name: task for task in (Task(), Break())}
+    task_cache[DEFAULT_TASK_CACHE_KEY] = Task()
+    tasks = []
 
-        settings.beginReadArray("tasks")
-        settings.setArrayIndex(0)
-        while settings.childKeys():
-            tasks.append(read_task(settings, task_cache))
-            settings.setArrayIndex(len(tasks))
+    settings.setArrayIndex(0)
+    while settings.childKeys():
+        tasks.append(read_task(settings, task_cache))
+        settings.setArrayIndex(len(tasks))
 
-        return tasks
-    finally:
-        settings.endArray()
+    return tasks
