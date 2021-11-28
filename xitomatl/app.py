@@ -1,14 +1,11 @@
 # SPDX-License-Identifier: LGPL-2.0-or-later
-from PySide6.QtGui import QColor, QIcon, QPixmap
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
+from xitomatl.icon import task_icon
 from xitomatl.pomodoro import Pomodoro, State
 
-
-def color_icon(color_name):
-    pix = QPixmap(1, 1)
-    pix.fill(QColor(color_name))
-    return QIcon(pix)
+DEFAULT_ICON_SIZE = 64
 
 
 def start_task_callback(pomodoro, index):
@@ -24,13 +21,14 @@ def in_menu_tasks(tasks):
             yield index, task
 
 
-def add_task_actions(menu, pomodoro):
+def add_task_actions(menu, pomodoro, icon_size):
     actions = {}
     for number, (index, task) in enumerate(in_menu_tasks(pomodoro.tasks)):
         text = f"&{number + 1}. {task}"
         start_task = start_task_callback(pomodoro, index)
         act = menu.addAction(text, start_task)
-        act.setIcon(color_icon(task.color))
+        icon = task_icon(task, State.Running, task.minutes, icon_size)
+        act.setIcon(icon)
         actions[index] = act
 
     return actions
@@ -46,6 +44,8 @@ class App:
         self.icon = QSystemTrayIcon()
         self.icon.activated.connect(self.on_activated)
 
+        self.icon_size = int(settings.value("icon_size", DEFAULT_ICON_SIZE))
+
         menu = QMenu()
         menu.addAction(
             QIcon.fromTheme("media-playback-start"),
@@ -59,7 +59,9 @@ class App:
             QIcon.fromTheme("media-playback-stop"), "&Stop", self.pomodoro.stop
         )
         menu.addSeparator()
-        self.task_actions = add_task_actions(menu, self.pomodoro)
+        self.task_actions = add_task_actions(
+            menu, self.pomodoro, self.icon_size
+        )
         menu.addSeparator()
         menu.addAction(
             QIcon.fromTheme("application-exit"), "&Quit", self.app.quit
@@ -81,7 +83,13 @@ class App:
             self.pomodoro.stop()
 
     def on_state_changed(self):
-        self.icon.setIcon(self.pomodoro.current_icon())
+        icon = task_icon(
+            self.pomodoro.current_task(),
+            self.pomodoro.state,
+            self.pomodoro.remaining_minutes(),
+            self.icon_size,
+        )
+        self.icon.setIcon(icon)
         self.icon.setToolTip(
             f"{QApplication.applicationName()}: {self.pomodoro}"
         )

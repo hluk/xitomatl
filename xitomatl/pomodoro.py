@@ -1,10 +1,11 @@
 # SPDX-License-Identifier: LGPL-2.0-or-later
 from contextlib import contextmanager
 
-from PySide6.QtCore import QElapsedTimer, QPoint, Qt, QTimer
-from PySide6.QtGui import QColor, QFont, QFontMetrics, QIcon, QPainter, QPixmap
+from PySide6.QtCore import QElapsedTimer, Qt, QTimer
+from PySide6.QtGui import QColor
 
 from xitomatl.log import log
+from xitomatl.state import State
 from xitomatl.tasks import (
     DEFAULT_TASK_CACHE_KEY,
     Break,
@@ -14,7 +15,6 @@ from xitomatl.tasks import (
     to_bool,
 )
 
-ICON_SIZE = 64
 SHORT_BREAK_COUNT = 3
 
 
@@ -65,11 +65,6 @@ def enterGroup(settings, name):
         settings.endGroup()
 
 
-class State:
-    Stopped = 0
-    Running = 1
-
-
 class Pomodoro:
     def __init__(self, settings):
         self.state = State.Stopped
@@ -91,8 +86,6 @@ class Pomodoro:
         self.timer.timeout.connect(self.on_timeout)
         self.finished = True
 
-        self.icon_size = int(settings.value("icon_size", ICON_SIZE))
-
         log.info("[%s] Initialized", self)
 
         autostart = settings.value("autostart", "true")
@@ -106,69 +99,6 @@ class Pomodoro:
             f" {self.current_task()}"
             f" {self.elapsed_minutes()}m {state}"
         )
-
-    def current_icon(self):
-        width = self.icon_size
-        height = self.icon_size
-        pix = QPixmap(width, height)
-        pix.fill(Qt.transparent)
-        try:
-            painter = QPainter(pix)
-            painter.setRenderHint(QPainter.TextAntialiasing)
-            painter.setRenderHint(QPainter.Antialiasing)
-            painter.setPen(Qt.NoPen)
-
-            task = self.current_task()
-
-            color = task.color
-            text_color = task.text_color
-            if self.state == State.Running:
-                remaining = self.remaining_minutes()
-                if remaining <= 0:
-                    remaining = -remaining
-                    color = task.important_color
-                    text_color = task.important_text_color
-
-            pad = task.icon_padding * self.icon_size // 100
-            painter.setBrush(color)
-            rect = pix.rect().adjusted(pad, pad, -pad, -pad)
-            painter.drawRoundedRect(
-                rect, task.icon_radius, task.icon_radius, Qt.RelativeSize
-            )
-
-            if self.state == State.Stopped:
-                painter.setBrush(text_color)
-                pad *= 3
-                rect = pix.rect().adjusted(pad, pad, -pad, -pad)
-                painter.drawRect(rect)
-            elif self.state == State.Running:
-                icon_text = str(remaining)
-
-                font = QFont(task.font)
-                font.setPixelSize(task.text_size * self.icon_size // 100)
-
-                painter.setFont(font)
-                painter.setPen(text_color)
-
-                metrics = QFontMetrics(font)
-                rect = metrics.tightBoundingRect(icon_text)
-                bottom_left = rect.bottomLeft()
-                x = (
-                    (width - rect.width()) / 2
-                    + task.text_x * width / 100
-                    - bottom_left.x()
-                )
-                y = (
-                    (height - rect.height()) / 2
-                    + task.text_y * height / 100
-                    - bottom_left.y()
-                )
-                pos = QPoint(x, height - y)
-                painter.drawText(pos, icon_text)
-        finally:
-            painter.end()
-
-        return QIcon(pix)
 
     def current_task(self):
         if self.state == State.Running:
