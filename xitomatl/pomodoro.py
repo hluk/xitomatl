@@ -230,5 +230,9 @@ class Pomodoro:
         if not self.finished and remaining <= 0:
             self.finish()
 
-        interval = remaining % 60000 + 1000
+        interval = remaining % 60000
+        if interval == 0:
+            interval += 60000
+        interval += 1000
+        log.debug("Scheduling next update in %s ms", interval)
         self.timer.start(interval)
