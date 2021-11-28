@@ -116,7 +116,7 @@ class Pomodoro:
             painter = QPainter(pix)
             painter.setRenderHint(QPainter.TextAntialiasing)
             painter.setRenderHint(QPainter.Antialiasing)
-            painter.setPen(Qt.transparent)
+            painter.setPen(Qt.NoPen)
 
             task = self.current_task()
 
