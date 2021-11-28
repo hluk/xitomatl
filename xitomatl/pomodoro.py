@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: LGPL-2.0-or-later
+import os
 from contextlib import contextmanager
 
 from PySide6.QtCore import QElapsedTimer, Qt, QTimer, QUrl
@@ -6,6 +7,7 @@ from PySide6.QtGui import QColor, QIcon, QPixmap
 from PySide6.QtQml import QQmlComponent
 from PySide6.QtQuick import QQuickView
 
+from xitomatl.config import default_qml_path, fallback_qml_path
 from xitomatl.log import log
 from xitomatl.tasks import (
     DEFAULT_TASK_CACHE_KEY,
@@ -18,40 +20,6 @@ from xitomatl.tasks import (
 
 ICON_SIZE = 64
 SHORT_BREAK_COUNT = 3
-
-DEFAULT_ICON_QML = """
-import QtQuick 2.0
-Item {
-  width: icon_size
-  height: icon_size
-  Rectangle {
-    color: icon_color
-    width: parent.width - icon_padding * 2
-    height: parent.height - icon_padding * 2
-    radius: icon_radius
-    anchors.centerIn: parent
-
-    Text {
-      visible: task_running
-      color: text_color
-      text: icon_text
-      font.family: icon_font
-      font.pixelSize: icon_font_size
-      anchors.fill: parent
-      horizontalAlignment: Text.AlignHCenter
-      verticalAlignment: Text.AlignVCenter
-    }
-
-    Rectangle {
-      visible: !task_running
-      width: parent.width - icon_padding * 3
-      height: parent.height - icon_padding * 3
-      color: text_color
-      anchors.centerIn: parent
-    }
-  }
-}
-"""
 
 
 def default_pomodoro_tasks():
@@ -107,7 +75,7 @@ class State:
 
 
 class Pomodoro:
-    def __init__(self, settings):
+    def __init__(self, settings, qml):
         self.state = State.Stopped
 
         with readArray(settings, "tasks"):
@@ -142,14 +110,14 @@ class Pomodoro:
         context.setContextProperty("icon_size", self.icon_size)
         self._update()
 
-        icon_qml = settings.value("icon_qml", DEFAULT_ICON_QML).encode("utf-8")
-        component = QQmlComponent(self.quick_view.engine())
-        component.setData(icon_qml, QUrl())
-        self.quick_item = component.create(context)
-        if not self.quick_item:
-            raise RuntimeError(component.errorString())
-
-        self.quick_view.setContent(QUrl(), component, self.quick_item)
+        loaded = (
+            (qml is not None and self._load_source(qml))
+            or self._load_source_from_settings(settings)
+            or self._load_source(default_qml_path())
+            or self._load_source(fallback_qml_path())
+        )
+        if not loaded:
+            raise RuntimeError("Failed to find QML file")
 
     def __str__(self):
         state = "⏸︎" if self.state == State.Stopped else "⏵︎"
@@ -158,6 +126,29 @@ class Pomodoro:
             f" {self.current_task()}"
             f" {self.elapsed_minutes()}m {state}"
         )
+
+    def _load_source_from_settings(self, settings):
+        icon_qml = settings.value("icon_qml", "").encode("utf-8")
+        if not icon_qml:
+            return False
+
+        component = QQmlComponent(self.quick_view.engine())
+        component.setData(icon_qml, QUrl())
+        context = self.quick_view.rootContext()
+        self.quick_item = component.create(context)
+        if not self.quick_item:
+            raise RuntimeError(component.errorString())
+
+        self.quick_view.setContent(QUrl(), component, self.quick_item)
+        return True
+
+    def _load_source(self, qml):
+        if not os.path.exists(qml):
+            return False
+
+        log.debug("Loading QML: %s", qml)
+        self.quick_view.setSource(qml)
+        return True
 
     def _update(self):
         task = self.current_task()

@@ -37,10 +37,10 @@ def add_task_actions(menu, pomodoro):
 
 
 class App:
-    def __init__(self, argv, settings):
+    def __init__(self, argv, settings, qml):
         self.app = QApplication(argv)
 
-        self.pomodoro = Pomodoro(settings)
+        self.pomodoro = Pomodoro(settings, qml)
         self.pomodoro.state_changed.connect(self.on_state_changed)
 
         self.icon = QSystemTrayIcon()

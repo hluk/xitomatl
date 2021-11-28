@@ -4,6 +4,7 @@
 Simple pomodoro timer app residing in tray.
 """
 import argparse
+import os
 import signal
 import sys
 
@@ -11,6 +12,11 @@ from PySide6.QtCore import QCoreApplication, QSettings
 
 from xitomatl import __version__
 from xitomatl.app import App
+from xitomatl.config import (
+    default_qml_path,
+    default_settings_file,
+    fallback_qml_path,
+)
 from xitomatl.log import APP_ID, init_debug_logging, init_logging, log
 
 
@@ -25,7 +31,7 @@ def parse_args():
         type=str,
         help=(
             "set the configuration file path"
-            f"(default {QSettings().fileName()})"
+            f"(default {default_settings_file()})"
         ),
     )
     parser.add_argument(
@@ -34,6 +40,15 @@ def parse_args():
         default=False,
         action="store_true",
         help="print debug information",
+    )
+    parser.add_argument(
+        "-q",
+        "--qml",
+        type=str,
+        help=(
+            "Path to QML file defining the icon appearance"
+            f"(default {default_qml_path()} or {fallback_qml_path()})"
+        ),
     )
     return parser.parse_args()
 
@@ -53,6 +68,9 @@ def create_app():
     else:
         init_logging()
 
+    if args.qml is not None and not os.path.exists(args.qml):
+        raise SystemExit(f"Error: QML file {args.qml!r} not found.")
+
     if args.config:
         settings = QSettings(args.config, QSettings.IniFormat)
     else:
@@ -60,7 +78,7 @@ def create_app():
 
     log.debug("Config: %s", settings.fileName())
 
-    return App(sys.argv, settings)
+    return App(sys.argv, settings, args.qml)
 
 
 def main():

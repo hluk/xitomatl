@@ -101,6 +101,7 @@ jobs:
           --plugin-enable=pyside6
           --show-modules
           --show-scons
+          --include-data-dir=resources=resources
           ${{ matrix.nuitka-arguments }}
           xitomatl
 
