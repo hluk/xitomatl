@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: LGPL-2.0-or-later
+import shlex
 from contextlib import contextmanager
+from subprocess import Popen  # nosec B404
 
 from PySide6.QtCore import QElapsedTimer, Qt, QTimer
 from PySide6.QtGui import QColor
@@ -16,6 +18,15 @@ from xitomatl.tasks import (
 )
 
 SHORT_BREAK_COUNT = 3
+
+
+def _run(command):
+    for subcommand in command.split("\n"):
+        subcommand = subcommand.strip()
+        if subcommand:
+            args = shlex.split(subcommand)
+            log.info("Executing: %s", subcommand)
+            Popen(args)
 
 
 def default_pomodoro_tasks():
@@ -108,12 +119,17 @@ class Pomodoro:
 
     def start_task(self, index):
         log.info("[%s] Select start", self)
+        if self.state == State.Running:
+            self._run_command_stop()
         self.state = State.Running
         self.current_task_index = index
         self.on_changed()
+        self._run_command_start()
 
     def stop(self):
         log.info("[%s] Stop", self)
+        if self.state == State.Running:
+            self._run_command_stop()
         self.state = State.Stopped
         self.current_task_index = 0
         self.on_changed()
@@ -126,19 +142,26 @@ class Pomodoro:
 
     def start(self):
         log.info("[%s] Start", self)
+        if self.state == State.Running:
+            self._run_command_stop()
         self.state = State.Running
         self.on_changed()
+        self._run_command_start()
 
     def next(self):
         log.info("[%s] Next", self)
+        if self.state == State.Running:
+            self._run_command_stop()
         self.current_task_index = (self.current_task_index + 1) % len(
             self.tasks
         )
         self.on_changed()
+        self._run_command_start()
 
     def finish(self):
         log.info("[%s] Finished", self)
         self.finished = True
+        self._run_command_finish()
 
     @property
     def state_changed(self):
@@ -166,3 +189,15 @@ class Pomodoro:
         interval += 1000
         log.debug("Scheduling next update in %s ms", interval)
         self.timer.start(interval)
+
+    def _run_command_start(self):
+        task = self.current_task()
+        _run(task.command_start)
+
+    def _run_command_stop(self):
+        task = self.current_task()
+        _run(task.command_stop)
+
+    def _run_command_finish(self):
+        task = self.current_task()
+        _run(task.command_finish)

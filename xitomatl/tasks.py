@@ -27,6 +27,9 @@ class Task:
         text_y=0,
         icon_radius=30,
         icon_padding=10,
+        command_start="",
+        command_stop="",
+        command_finish="",
     ):
         self.minutes = minutes
         self.name = name
@@ -41,6 +44,9 @@ class Task:
         self.text_y = text_y
         self.icon_radius = icon_radius
         self.icon_padding = icon_padding
+        self.command_start = command_start
+        self.command_stop = command_stop
+        self.command_finish = command_finish
 
     def __str__(self):
         return f"{self.name}/{self.minutes}"
@@ -79,6 +85,9 @@ def read_task(settings, task_cache):
         ("text_y", int),
         ("icon_radius", int),
         ("icon_padding", int),
+        ("command_start", str),
+        ("command_stop", str),
+        ("command_finish", str),
     )
     for key, convert in KEYS:
         value = settings.value(key)
