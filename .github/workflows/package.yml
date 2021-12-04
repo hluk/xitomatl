@@ -5,8 +5,6 @@ name: package
 # yamllint disable-line rule:truthy
 on:
   push:
-    branches:
-      - master
   pull_request:
     branches:
       - master
@@ -104,8 +102,6 @@ jobs:
           path: ${{ matrix.artifact-file }}
 
       - name: Run smoke test
-        # There is a macOS bug in Nuitka 0.6.17:
-        # https://github.com/Nuitka/Nuitka/issues/1195
         if: runner.os != 'macOS'
         shell: bash
         run: ./${{ matrix.artifact-file }} --version
