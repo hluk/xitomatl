@@ -32,7 +32,7 @@ jobs:
             buildname: Windows
             artifact-name: xitomatl for Windows
             artifact-file: xitomatl.exe
-            nuitka-arguments: --windows-icon-from-ico=xitomatl.png
+            nuitka-arguments: --windows-icon-from-ico=xitomatl.png --lto=no
 
           - os: macos-latest
             buildname: macOS
