@@ -64,16 +64,7 @@ jobs:
         with:
           poetry-version: ${{ matrix.poetry-version }}
 
-      - name: Restore Poetry cache
-        uses: actions/cache@v2
-        id: cache-poetry
-        with:
-          path: ${{ runner.workspace }}/venv
-          key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}-${{ steps.setup-python.outputs.python-version }}
-
       - name: Install dependencies
-        env:
-          POETRY_VIRTUALENVS_PATH: ${{ runner.workspace }}/venv
         run: poetry install --no-root --no-interaction
 
       - name: (Linux) Install runtime dependencies
@@ -90,8 +81,6 @@ jobs:
             libopengl0
 
       - name: Create package
-        env:
-          POETRY_VIRTUALENVS_PATH: ${{ runner.workspace }}/venv
         run: >-
           poetry run nuitka3
           --onefile
@@ -122,6 +111,4 @@ jobs:
         run: ./${{ matrix.artifact-file }} --version
 
       - name: Run tests
-        env:
-          POETRY_VIRTUALENVS_PATH: ${{ runner.workspace }}/venv
         run: poetry run pytest
