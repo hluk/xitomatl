@@ -79,6 +79,8 @@ jobs:
             libopengl0
 
       - name: Create package
+        env:
+          PYTHONIOENCODING: utf-8
         run: >-
           poetry run nuitka3
           --onefile
