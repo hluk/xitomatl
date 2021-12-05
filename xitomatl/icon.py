@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: LGPL-2.0-or-later
 from PySide6.QtCore import QPoint, Qt
-from PySide6.QtGui import QFont, QFontMetrics, QIcon, QPainter, QPixmap
+from PySide6.QtGui import QFont, QFontMetrics, QIcon, QPainter, QPen, QPixmap
 
 from xitomatl.state import State
 
@@ -15,16 +15,19 @@ def task_icon(task, state, remaining_minutes, icon_size):
         painter = QPainter(pix)
         painter.setRenderHint(QPainter.TextAntialiasing)
         painter.setRenderHint(QPainter.Antialiasing)
-        painter.setPen(Qt.NoPen)
 
         color = task.color
         text_color = task.text_color
+        line_color = task.line_color
         if state == State.Running:
             remaining = remaining_minutes
             if remaining <= 0:
                 remaining = -remaining
                 color = task.important_color
                 text_color = task.important_text_color
+                line_color = task.important_line_color
+
+        painter.setPen(QPen(line_color, task.line_width * icon_size // 100))
 
         pad = task.icon_padding * icon_size // 100
         painter.setBrush(color)
