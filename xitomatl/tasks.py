@@ -5,6 +5,24 @@ from PySide6.QtGui import QColor
 
 DEFAULT_ICON_FONT = "Noto Sans Mono Condensed ExtraBold"
 DEFAULT_TASK_CACHE_KEY = "__default__"
+DEFAULT_TASK_ARGS = dict(
+    name="focus",
+    minutes=25,
+    color=QColor("#007ba7"),
+    text_color=QColor("white"),
+    important_color=QColor("#ff0040"),
+    important_text_color=QColor("white"),
+    font=DEFAULT_ICON_FONT,
+    in_menu=True,
+    text_size=65,
+    text_x=0,
+    text_y=0,
+    icon_radius=30,
+    icon_padding=10,
+    command_start="",
+    command_stop="",
+    command_finish="",
+)
 
 
 def to_bool(value):
@@ -12,41 +30,9 @@ def to_bool(value):
 
 
 class Task:
-    def __init__(
-        self,
-        name="focus",
-        minutes=25,
-        color=QColor("#007ba7"),
-        text_color=QColor("white"),
-        important_color=QColor("#ff0040"),
-        important_text_color=QColor("white"),
-        font=DEFAULT_ICON_FONT,
-        in_menu=True,
-        text_size=65,
-        text_x=0,
-        text_y=0,
-        icon_radius=30,
-        icon_padding=10,
-        command_start="",
-        command_stop="",
-        command_finish="",
-    ):
-        self.minutes = minutes
-        self.name = name
-        self.color = color
-        self.text_color = text_color
-        self.important_color = important_color
-        self.important_text_color = important_text_color
-        self.font = font
-        self.in_menu = in_menu
-        self.text_size = text_size
-        self.text_x = text_x
-        self.text_y = text_y
-        self.icon_radius = icon_radius
-        self.icon_padding = icon_padding
-        self.command_start = command_start
-        self.command_stop = command_stop
-        self.command_finish = command_finish
+    def __init__(self, **kwargs):
+        for k, v in DEFAULT_TASK_ARGS.items():
+            setattr(self, k, kwargs.get(k, v))
 
     def __str__(self):
         return f"{self.name}/{self.minutes}"
@@ -73,25 +59,12 @@ def read_task(settings, task_cache):
     default_task.name = name
     task = task_cache.setdefault(name, default_task)
 
-    KEYS = (
-        ("minutes", int),
-        ("color", QColor),
-        ("text_color", QColor),
-        ("important_color", QColor),
-        ("font", str),
-        ("in_menu", to_bool),
-        ("text_size", int),
-        ("text_x", int),
-        ("text_y", int),
-        ("icon_radius", int),
-        ("icon_padding", int),
-        ("command_start", str),
-        ("command_stop", str),
-        ("command_finish", str),
-    )
-    for key, convert in KEYS:
+    for key, default_value in DEFAULT_TASK_ARGS.items():
         value = settings.value(key)
         if value:
+            convert = type(default_value)
+            if convert is bool:
+                convert = to_bool
             setattr(task, key, convert(value))
 
     task_cache[DEFAULT_TASK_CACHE_KEY] = copy(task)
