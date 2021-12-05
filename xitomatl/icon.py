@@ -1,6 +1,14 @@
 # SPDX-License-Identifier: LGPL-2.0-or-later
 from PySide6.QtCore import QPoint, Qt
-from PySide6.QtGui import QFont, QFontMetrics, QIcon, QPainter, QPen, QPixmap
+from PySide6.QtGui import (
+    QFont,
+    QFontMetrics,
+    QIcon,
+    QPainter,
+    QPainterPath,
+    QPen,
+    QPixmap,
+)
 
 from xitomatl.state import State
 
@@ -47,9 +55,6 @@ def task_icon(task, state, remaining_minutes, icon_size):
             font = QFont(task.font)
             font.setPixelSize(task.text_size * icon_size // 100)
 
-            painter.setFont(font)
-            painter.setPen(text_color)
-
             metrics = QFontMetrics(font)
             rect = metrics.tightBoundingRect(icon_text)
             bottom_left = rect.bottomLeft()
@@ -64,6 +69,18 @@ def task_icon(task, state, remaining_minutes, icon_size):
                 - bottom_left.y()
             )
             pos = QPoint(x, height - y)
+
+            if task.text_stroke_width > 0:
+                path = QPainterPath()
+                path.addText(pos, font, icon_text)
+                stroke = QPen(
+                    task.text_stroke_color,
+                    task.text_stroke_width * icon_size // 100,
+                )
+                painter.strokePath(path, stroke)
+
+            painter.setFont(font)
+            painter.setPen(text_color)
             painter.drawText(pos, icon_text)
     finally:
         painter.end()
