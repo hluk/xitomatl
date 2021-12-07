@@ -3,35 +3,60 @@ from copy import copy
 
 from PySide6.QtGui import QColor
 
-DEFAULT_ICON_FONT = "Noto Sans Mono Condensed ExtraBold"
+DEFAULT_FONT = "Noto Sans Mono Condensed"
+DEFAULT_TIMEOUT_FONT = "Noto Sans Mono Condensed ExtraBold"
 DEFAULT_TASK_CACHE_KEY = "__default__"
 DEFAULT_TASK_ARGS = dict(
     name="focus",
     minutes=25,
+    in_menu=True,
+    command_start="",
+    command_stop="",
+    command_finish="",
+    # Normal appearance options
+    font=DEFAULT_TIMEOUT_FONT,
     color=QColor("#007ba7"),
     line_color=QColor("transparent"),
     line_width=0,
     text_color=QColor("white"),
-    important_color=QColor("#ff0040"),
-    important_text_color=QColor("white"),
-    important_line_color=QColor("transparent"),
     text_stroke_width=0,
     text_stroke_color=QColor("transparent"),
-    font=DEFAULT_ICON_FONT,
-    in_menu=True,
     text_size=65,
     text_x=0,
     text_y=0,
     icon_radius=30,
     icon_padding=10,
-    command_start="",
-    command_stop="",
-    command_finish="",
+    # Timed out appearance options
+    timeout_font=DEFAULT_FONT,
+    timeout_color=QColor("#ff0040"),
+    timeout_line_color=QColor("transparent"),
+    timeout_line_width=0,
+    timeout_text_color=QColor("white"),
+    timeout_text_stroke_width=0,
+    timeout_text_stroke_color=QColor("transparent"),
+    timeout_text_size=65,
+    timeout_text_x=0,
+    timeout_text_y=0,
+    timeout_icon_radius=30,
+    timeout_icon_padding=10,
 )
 
 
 def to_bool(value):
     return str(value).lower() in ("true", "1", "yes", "on")
+
+
+class TimedOutTask:
+    """
+    Wrapper for task providing timeout_* attributes instead of normal ones.
+    """
+
+    def __init__(self, task):
+        self.task = task
+
+    def __getattr__(self, attr):
+        if hasattr(self.task, attr):
+            return getattr(self.task, "timeout_" + attr)
 
 
 class Task:
@@ -42,6 +67,9 @@ class Task:
     def __str__(self):
         return f"{self.name}/{self.minutes}"
 
+    def as_timed_out(self):
+        return TimedOutTask(self)
+
 
 class Break(Task):
     def __init__(self, minutes=5, in_menu=False):
@@ -50,8 +78,8 @@ class Break(Task):
             minutes=minutes,
             color=QColor("#de3163"),
             text_color=QColor("white"),
-            important_color=QColor("#ffbf00"),
-            important_text_color=QColor("black"),
+            timeout_color=QColor("#ffbf00"),
+            timeout_text_color=QColor("black"),
             in_menu=in_menu,
             icon_radius=100,
             text_y=0,

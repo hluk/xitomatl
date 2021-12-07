@@ -24,28 +24,25 @@ def task_icon(task, state, remaining_minutes, icon_size):
         painter.setRenderHint(QPainter.TextAntialiasing)
         painter.setRenderHint(QPainter.Antialiasing)
 
-        color = task.color
-        text_color = task.text_color
-        line_color = task.line_color
         if state == State.Running:
             remaining = remaining_minutes
             if remaining <= 0:
                 remaining = -remaining
-                color = task.important_color
-                text_color = task.important_text_color
-                line_color = task.important_line_color
+                task = task.as_timed_out()
 
-        painter.setPen(QPen(line_color, task.line_width * icon_size // 100))
+        painter.setPen(
+            QPen(task.line_color, task.line_width * icon_size // 100)
+        )
 
         pad = task.icon_padding * icon_size // 100
-        painter.setBrush(color)
+        painter.setBrush(task.color)
         rect = pix.rect().adjusted(pad, pad, -pad, -pad)
         painter.drawRoundedRect(
             rect, task.icon_radius, task.icon_radius, Qt.RelativeSize
         )
 
         if state == State.Stopped:
-            painter.setBrush(text_color)
+            painter.setBrush(task.text_color)
             pad *= 3
             rect = pix.rect().adjusted(pad, pad, -pad, -pad)
             painter.drawRect(rect)
@@ -80,7 +77,7 @@ def task_icon(task, state, remaining_minutes, icon_size):
                 painter.strokePath(path, stroke)
 
             painter.setFont(font)
-            painter.setPen(text_color)
+            painter.setPen(task.text_color)
             painter.drawText(pos, icon_text)
     finally:
         painter.end()
