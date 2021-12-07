@@ -55,8 +55,9 @@ class TimedOutTask:
         self.task = task
 
     def __getattr__(self, attr):
-        if hasattr(self.task, attr):
+        if hasattr(self.task, "timeout_" + attr):
             return getattr(self.task, "timeout_" + attr)
+        return getattr(self.task, attr)
 
 
 class Task:
