@@ -38,7 +38,7 @@ jobs:
             buildname: macOS
             artifact-name: xitomatl for macOS
             artifact-file: xitomatl.bin
-            nuitka-arguments: --macos-onefile-icon=xitomatl.png
+            nuitka-arguments: --macos-onefile-icon=xitomatl.png --clang
 
           - os: ubuntu-latest
             buildname: Linux
