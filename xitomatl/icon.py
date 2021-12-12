@@ -10,6 +10,7 @@ from PySide6.QtGui import (
     QPixmap,
 )
 
+from xitomatl.log import log
 from xitomatl.state import State
 
 
@@ -37,9 +38,16 @@ def task_icon(task, state, remaining_minutes, icon_size):
         pad = task.icon_padding * icon_size // 100
         painter.setBrush(task.color)
         rect = pix.rect().adjusted(pad, pad, -pad, -pad)
-        painter.drawRoundedRect(
-            rect, task.icon_radius, task.icon_radius, Qt.RelativeSize
-        )
+        if task.image:
+            image = QPixmap(task.image)
+            if image.isNull():
+                log.warning("Failed to load image: %s", task.image)
+            else:
+                painter.drawPixmap(rect, image)
+        else:
+            painter.drawRoundedRect(
+                rect, task.icon_radius, task.icon_radius, Qt.RelativeSize
+            )
 
         if state == State.Stopped:
             painter.setBrush(task.text_color)

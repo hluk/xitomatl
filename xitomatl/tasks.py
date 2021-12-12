@@ -13,6 +13,7 @@ DEFAULT_TASK_ARGS = dict(
     command_start="",
     command_stop="",
     command_finish="",
+    image="",
     # Normal appearance options
     font=DEFAULT_TIMEOUT_FONT,
     color=QColor("#007ba7"),
