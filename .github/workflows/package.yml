@@ -78,6 +78,13 @@ jobs:
             libegl1
             libopengl0
 
+      - name: (macOS) Fix build dependencies
+        if: runner.os == 'macOS'
+        shell: bash
+        run: >-
+          ln -s /usr/local/opt/openssl@1.1/lib/libcrypto.1.1.dylib /usr/local/lib/libcrypto.dylib &&
+          ln -s /usr/local/opt/openssl@1.1/lib/libssl.1.1.dylib /usr/local/lib/libssl.dylib
+
       - name: Use version from Git
         shell: bash
         run: ./update_version.sh
@@ -85,6 +92,7 @@ jobs:
       - name: Create package
         env:
           PYTHONIOENCODING: utf-8
+          LD_LIBRARY_PATH: /usr/local/lib/:$LD_LIBRARY_PATH
         run: >-
           poetry run nuitka3
           --onefile
