@@ -15,7 +15,7 @@ DEFAULT_TASK_ARGS = dict(
     command_finish="",
     image="",
     # Normal appearance options
-    font=DEFAULT_TIMEOUT_FONT,
+    font=DEFAULT_FONT,
     color=QColor("#007ba7"),
     line_color=QColor("transparent"),
     line_width=0,
@@ -28,7 +28,7 @@ DEFAULT_TASK_ARGS = dict(
     icon_radius=30,
     icon_padding=10,
     # Timed out appearance options
-    timeout_font=DEFAULT_FONT,
+    timeout_font=DEFAULT_TIMEOUT_FONT,
     timeout_color=QColor("#ff0040"),
     timeout_line_color=QColor("transparent"),
     timeout_line_width=0,
