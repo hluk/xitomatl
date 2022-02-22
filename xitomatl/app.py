@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: LGPL-2.0-or-later
+from PySide6.QtCore import QTimer
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
@@ -6,6 +7,7 @@ from xitomatl.icon import task_icon
 from xitomatl.pomodoro import Pomodoro, State
 
 DEFAULT_ICON_SIZE = 64
+DEFAULT_DOUBLE_CLICK_INTERVAL_MS = 100
 
 
 def start_task_callback(pomodoro, index):
@@ -73,14 +75,32 @@ class App:
         self.on_state_changed()
         self.icon.show()
 
+        # Workaround for interpreting double clicks on tray icon as three
+        # single clicks in waybar.
+        self.click_timer = QTimer()
+        double_click_interval_ms = int(
+            settings.value(
+                "double_click_interval_ms", DEFAULT_DOUBLE_CLICK_INTERVAL_MS
+            )
+        )
+        self.click_timer.setSingleShot(True)
+        self.click_timer.setInterval(double_click_interval_ms)
+        self.click_timer.timeout.connect(self.on_icon_single_click)
+
     def on_activated(self, reason):
         if reason == QSystemTrayIcon.ActivationReason.Trigger:
-            if self.pomodoro.state == State.Running:
-                self.pomodoro.next()
-            else:
-                self.pomodoro.start()
+            self.click_timer.start()
         elif reason == QSystemTrayIcon.ActivationReason.MiddleClick:
-            self.pomodoro.stop()
+            self.on_icon_middle_click()
+
+    def on_icon_single_click(self):
+        if self.pomodoro.state == State.Running:
+            self.pomodoro.next()
+        else:
+            self.pomodoro.start()
+
+    def on_icon_middle_click(self):
+        self.pomodoro.stop()
 
     def on_state_changed(self):
         icon = task_icon(
