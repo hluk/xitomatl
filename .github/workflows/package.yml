@@ -22,7 +22,7 @@ jobs:
           - ubuntu-latest
 
         python-version:
-          - 3.9
+          - "3.10"
 
         poetry-version:
           - 1.1.11
@@ -38,7 +38,7 @@ jobs:
             buildname: macOS
             artifact-name: xitomatl for macOS
             artifact-file: xitomatl.bin
-            nuitka-arguments: --macos-onefile-icon=xitomatl.png --clang
+            nuitka-arguments: --macos-app-icon=xitomatl.png --clang
 
           - os: ubuntu-latest
             buildname: Linux
@@ -94,7 +94,7 @@ jobs:
           PYTHONIOENCODING: utf-8
           LD_LIBRARY_PATH: /usr/local/lib/:$LD_LIBRARY_PATH
         run: >-
-          poetry run nuitka3
+          poetry run python -m nuitka
           --onefile
           --standalone
           --python-flag=no_site
