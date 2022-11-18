@@ -67,6 +67,7 @@ See [xitomatl.ini](xitomatl.ini) for the default configuration.
 
 Clone repository and **start** the app with:
 
+    poetry run python -m ensurepip --upgrade
     poetry install
     poetry run xitomatl
 
