@@ -32,18 +32,21 @@ jobs:
             buildname: Windows
             artifact-name: xitomatl for Windows
             artifact-file: xitomatl.exe
+            command: ./xitomatl.exe
             nuitka-arguments: --windows-icon-from-ico=xitomatl.png --lto=no
 
           - os: macos-latest
             buildname: macOS
             artifact-name: xitomatl for macOS
-            artifact-file: xitomatl.bin
-            nuitka-arguments: --macos-app-icon=xitomatl.png --clang
+            artifact-file: xitomatl.app
+            command: xitomatl.app/Contents/MacOS/xitomatl
+            nuitka-arguments: --macos-app-icon=xitomatl.png --clang --macos-create-app-bundle
 
           - os: ubuntu-latest
             buildname: Linux
             artifact-name: xitomatl for Linux
             artifact-file: xitomatl.bin
+            command: ./xitomatl.bin
             nuitka-arguments: --linux-onefile-icon=xitomatl.png
 
     steps:
@@ -82,8 +85,7 @@ jobs:
         if: runner.os == 'macOS'
         shell: bash
         run: >-
-          ln -s /usr/local/opt/openssl@1.1/lib/libcrypto.1.1.dylib /usr/local/lib/libcrypto.dylib &&
-          ln -s /usr/local/opt/openssl@1.1/lib/libssl.1.1.dylib /usr/local/lib/libssl.dylib
+          brew link --overwrite openssl@1.1
 
       - name: Use version from Git
         shell: bash
@@ -100,6 +102,7 @@ jobs:
           --python-flag=no_site
           --assume-yes-for-downloads
           --plugin-enable=pyside6
+          --plugin-enable=anti-bloat
           --show-modules
           --show-scons
           ${{ matrix.nuitka-arguments }}
@@ -114,11 +117,11 @@ jobs:
         with:
           name: ${{ matrix.artifact-name }}
           path: ${{ matrix.artifact-file }}
+          if-no-files-found: error
 
       - name: Run smoke test
-        if: runner.os != 'macOS'
         shell: bash
-        run: ./${{ matrix.artifact-file }} --version
+        run: ${{ matrix.command }} --version
 
       - name: Run tests
         run: poetry run pytest
