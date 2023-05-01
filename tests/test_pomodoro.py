@@ -27,8 +27,10 @@ def mock_commands_run(pomodoro):
         task.command_stop = f"stop{i}"
         task.command_finish = f"finish{i}"
 
-    with patch("xitomatl.pomodoro.Popen") as popen:
-        yield popen
+    with patch("xitomatl.pomodoro.run") as run:
+        run2 = Mock()
+        run.side_effect = lambda x, **_kw: run2(x)
+        yield run2
 
 
 def test_pomodoro_init():

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: LGPL-2.0-or-later
 import shlex
 from contextlib import contextmanager
-from subprocess import Popen  # nosec B404
+from subprocess import run  # nosec B404
 
 from PySide6.QtCore import QElapsedTimer, Qt, QTimer
 from PySide6.QtGui import QColor
@@ -24,9 +24,9 @@ def _run(command):
     for subcommand in command.split("\n"):
         subcommand = subcommand.strip()
         if subcommand:
-            args = shlex.split(subcommand)
             log.info("Executing: %s", subcommand)
-            Popen(args)
+            args = shlex.split(subcommand)
+            run(args, shell=False, check=True)  # nosec B603
 
 
 def default_pomodoro_tasks():
