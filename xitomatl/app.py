@@ -1,4 +1,6 @@
 # SPDX-License-Identifier: LGPL-2.0-or-later
+from functools import partial
+
 from PySide6.QtCore import QTimer
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
@@ -10,28 +12,14 @@ DEFAULT_ICON_SIZE = 64
 DEFAULT_DOUBLE_CLICK_INTERVAL_MS = 100
 
 
-def start_task_callback(pomodoro, index):
-    def start_task():
-        return pomodoro.start_task(index)
-
-    return start_task
-
-
-def in_menu_tasks(tasks):
-    for index, task in enumerate(tasks):
-        if task.in_menu:
-            yield index, task
-
-
 def add_task_actions(menu, pomodoro, icon_size):
-    actions = {}
-    for number, (index, task) in enumerate(in_menu_tasks(pomodoro.tasks)):
-        text = f"&{number + 1}. {task}"
-        start_task = start_task_callback(pomodoro, index)
-        act = menu.addAction(text, start_task)
+    actions = []
+    for index, task in enumerate(t for t in pomodoro.tasks if t.in_menu):
+        text = f"&{index + 1}. {task}"
+        act = menu.addAction(text, partial(pomodoro.start_task, index))
         icon = task_icon(task, State.Running, task.minutes, icon_size)
         act.setIcon(icon)
-        actions[index] = act
+        actions.append(act)
 
     return actions
 
@@ -114,14 +102,12 @@ class App:
             f"{QApplication.applicationName()}: {self.pomodoro}"
         )
 
-        act = self.task_actions.get(self.current_task_index)
-        if act:
-            act.setText(act.text()[2:])
+        act = self.task_actions[self.current_task_index]
+        act.setText(act.text()[2:])
 
         self.current_task_index = self.pomodoro.current_task_index
-        act = self.task_actions.get(self.current_task_index)
-        if act:
-            act.setText(f"▶ {act.text()}")
+        act = self.task_actions[self.current_task_index]
+        act.setText(f"▶ {act.text()}")
 
     def exec(self):
         return self.app.exec()
