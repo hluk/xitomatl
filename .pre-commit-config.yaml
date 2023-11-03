@@ -8,18 +8,13 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:
+      - id: check-merge-conflict
+      - id: check-yaml
       - id: debug-statements
       - id: end-of-file-fixer
       - id: trailing-whitespace
 
-  - repo: https://github.com/psf/black
-    rev: 23.10.1
-    hooks:
-      - id: black
-        language_version: python3.10
-        args:
-          - --line-length=79
-
+  # Sort imports
   - repo: https://github.com/pycqa/isort
     rev: 5.12.0
     hooks:
@@ -29,18 +24,37 @@ repos:
           - --line-length=79
           - --profile=black
 
+  # Remove unused imports, variables, statements
+  - repo: https://github.com/PyCQA/autoflake
+    rev: v2.2.1
+    hooks:
+      - id: autoflake
+
+  # Auto-update syntax
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.15.0
+    hooks:
+      - id: pyupgrade
+        args:
+          - --py311-plus
+
+  # Linter and formatter
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.3
+    hooks:
+      - id: ruff
+        args:
+          # ignore: E501 Line too long
+          - --ignore=E501
+      - id: ruff-format
+
+  # Security linter
   - repo: https://github.com/pycqa/bandit
     rev: 1.7.5
     hooks:
       - id: bandit
         name: bandit
         exclude: tests/
-
-  - repo: https://github.com/pycqa/flake8
-    rev: 6.1.0
-    hooks:
-      - id: flake8
-        name: flake8
 
   - repo: local
     hooks:

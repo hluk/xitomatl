@@ -23,10 +23,7 @@ def parse_args():
         "-c",
         "--config",
         type=str,
-        help=(
-            "set the configuration file path"
-            f"(default {QSettings().fileName()})"
-        ),
+        help=("set the configuration file path" f"(default {QSettings().fileName()})"),
     )
     parser.add_argument(
         "-d",

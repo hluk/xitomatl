@@ -14,11 +14,42 @@ from xitomatl.log import log
 from xitomatl.state import State
 
 
+def render_text(painter, task, size, icon_text):
+    font = QFont(task.font)
+    font.setPixelSize(task.text_size * size.width() // 100)
+
+    metrics = QFontMetrics(font)
+    rect = metrics.tightBoundingRect(icon_text)
+    bottom_left = rect.bottomLeft()
+    x = (
+        (size.width() - rect.width()) / 2
+        + task.text_x * size.width() / 100
+        - bottom_left.x()
+    )
+    y = (
+        (size.height() - rect.height()) / 2
+        + task.text_y * size.height() / 100
+        - bottom_left.y()
+    )
+    pos = QPoint(x, size.height() - y)
+
+    if task.text_stroke_width > 0:
+        path = QPainterPath()
+        path.addText(pos, font, icon_text)
+        stroke = QPen(
+            task.text_stroke_color,
+            task.text_stroke_width * size.width() // 100,
+        )
+        painter.strokePath(path, stroke)
+
+    painter.setFont(font)
+    painter.setPen(task.text_color)
+    painter.drawText(pos, icon_text)
+
+
 def task_icon(task, state, remaining_minutes, icon_size):
     """Created QIcon for given task and state."""
-    width = icon_size
-    height = icon_size
-    pix = QPixmap(width, height)
+    pix = QPixmap(icon_size, icon_size)
     pix.fill(Qt.transparent)
     try:
         painter = QPainter(pix)
@@ -31,9 +62,7 @@ def task_icon(task, state, remaining_minutes, icon_size):
                 remaining = -remaining
                 task = task.as_timed_out()
 
-        painter.setPen(
-            QPen(task.line_color, task.line_width * icon_size // 100)
-        )
+        painter.setPen(QPen(task.line_color, task.line_width * icon_size // 100))
 
         pad = task.icon_padding * icon_size // 100
         painter.setBrush(task.color)
@@ -55,38 +84,7 @@ def task_icon(task, state, remaining_minutes, icon_size):
             rect = pix.rect().adjusted(pad, pad, -pad, -pad)
             painter.drawRect(rect)
         elif state == State.Running:
-            icon_text = str(remaining)
-
-            font = QFont(task.font)
-            font.setPixelSize(task.text_size * icon_size // 100)
-
-            metrics = QFontMetrics(font)
-            rect = metrics.tightBoundingRect(icon_text)
-            bottom_left = rect.bottomLeft()
-            x = (
-                (width - rect.width()) / 2
-                + task.text_x * width / 100
-                - bottom_left.x()
-            )
-            y = (
-                (height - rect.height()) / 2
-                + task.text_y * height / 100
-                - bottom_left.y()
-            )
-            pos = QPoint(x, height - y)
-
-            if task.text_stroke_width > 0:
-                path = QPainterPath()
-                path.addText(pos, font, icon_text)
-                stroke = QPen(
-                    task.text_stroke_color,
-                    task.text_stroke_width * icon_size // 100,
-                )
-                painter.strokePath(path, stroke)
-
-            painter.setFont(font)
-            painter.setPen(task.text_color)
-            painter.drawText(pos, icon_text)
+            render_text(painter, task, pix.size(), str(remaining))
     finally:
         painter.end()
 

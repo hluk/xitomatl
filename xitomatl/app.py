@@ -49,13 +49,9 @@ class App:
             QIcon.fromTheme("media-playback-stop"), "&Stop", self.pomodoro.stop
         )
         menu.addSeparator()
-        self.task_actions = add_task_actions(
-            menu, self.pomodoro, self.icon_size
-        )
+        self.task_actions = add_task_actions(menu, self.pomodoro, self.icon_size)
         menu.addSeparator()
-        menu.addAction(
-            QIcon.fromTheme("application-exit"), "&Quit", self.app.quit
-        )
+        menu.addAction(QIcon.fromTheme("application-exit"), "&Quit", self.app.quit)
         self.icon.setContextMenu(menu)
 
         self.current_task_index = -1
@@ -67,9 +63,7 @@ class App:
         # single clicks in waybar.
         self.click_timer = QTimer()
         double_click_interval_ms = int(
-            settings.value(
-                "double_click_interval_ms", DEFAULT_DOUBLE_CLICK_INTERVAL_MS
-            )
+            settings.value("double_click_interval_ms", DEFAULT_DOUBLE_CLICK_INTERVAL_MS)
         )
         self.click_timer.setSingleShot(True)
         self.click_timer.setInterval(double_click_interval_ms)
@@ -98,9 +92,7 @@ class App:
             self.icon_size,
         )
         self.icon.setIcon(icon)
-        self.icon.setToolTip(
-            f"{QApplication.applicationName()}: {self.pomodoro}"
-        )
+        self.icon.setToolTip(f"{QApplication.applicationName()}: {self.pomodoro}")
 
         act = self.task_actions[self.current_task_index]
         act.setText(act.text()[2:])

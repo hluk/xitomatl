@@ -16,7 +16,7 @@ IMAGE_DIR = os.path.join(DIR, "images")
 
 
 def main():
-    app = QGuiApplication(sys.argv)  # noqa: F841
+    app = QGuiApplication(sys.argv)  # noqa: F841, pylint: disable=unused-variable
     init_logging()
     pomodoro = Pomodoro(QSettings())
     pomodoro.stop()
