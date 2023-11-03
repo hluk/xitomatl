@@ -197,9 +197,7 @@ def test_pomodoro_command_execute_multiple():
     pomodoro = Pomodoro(settings)
 
     with mock_commands_run(pomodoro) as run:
-        pomodoro.tasks[
-            0
-        ].command_stop = """
+        pomodoro.tasks[0].command_stop = """
             stop0.1
             stop0.2
         """

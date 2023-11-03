@@ -152,9 +152,7 @@ class Pomodoro:
         log.info("[%s] Next", self)
         if self.state == State.Running:
             self._run_command_stop()
-        self.current_task_index = (self.current_task_index + 1) % len(
-            self.tasks
-        )
+        self.current_task_index = (self.current_task_index + 1) % len(self.tasks)
         self.on_changed()
         self._run_command_start()
 
