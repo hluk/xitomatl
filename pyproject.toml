@@ -6,7 +6,7 @@ license = "GPL-2.0-or-later"
 authors = ["Lukas Holecek <hluk@email.cz>"]
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.11"
+python = ">=3.10,<3.13"
 PySide6-Essentials = "^6.5.1"
 
 [tool.poetry.dev-dependencies]
