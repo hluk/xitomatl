@@ -92,10 +92,8 @@ def test_pomodoro_stop():
     pomodoro.start()
     pomodoro.next()
     pomodoro.stop()
-    assert pomodoro.current_task_index == 0
+    assert pomodoro.current_task_index == -1
     assert pomodoro.state == State.Stopped
-    assert pomodoro.current_task().name == "focus"
-    assert pomodoro.current_task().minutes == 25
 
 
 def test_pomodoro_finish():

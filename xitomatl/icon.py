@@ -3,7 +3,6 @@ from PySide6.QtCore import QPoint, Qt
 from PySide6.QtGui import (
     QFont,
     QFontMetrics,
-    QIcon,
     QPainter,
     QPainterPath,
     QPen,
@@ -48,7 +47,7 @@ def render_text(painter, task, size, icon_text):
 
 
 def task_icon(task, state, remaining_minutes, icon_size):
-    """Created QIcon for given task and state."""
+    """Created QPixmap for given task and state."""
     pix = QPixmap(icon_size, icon_size)
     pix.fill(Qt.transparent)
     try:
@@ -88,4 +87,4 @@ def task_icon(task, state, remaining_minutes, icon_size):
     finally:
         painter.end()
 
-    return QIcon(pix)
+    return pix
