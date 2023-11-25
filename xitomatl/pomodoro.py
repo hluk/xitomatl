@@ -41,6 +41,7 @@ def default_stopped_task():
         name="stopped",
         color=QColor("#ff0040"),
         text_color=QColor("white"),
+        minutes=0,
     )
 
 
@@ -131,7 +132,7 @@ class Pomodoro:
         if self.state == State.Running:
             self._run_command_stop()
         self.state = State.Stopped
-        self.current_task_index = 0
+        self.current_task_index = -1
         self.on_changed()
 
     def elapsed_minutes(self):
@@ -144,6 +145,8 @@ class Pomodoro:
         log.info("[%s] Start", self)
         if self.state == State.Running:
             self._run_command_stop()
+        if self.current_task_index == -1:
+            self.current_task_index = 0
         self.state = State.Running
         self.on_changed()
         self._run_command_start()

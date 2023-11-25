@@ -1,46 +1,12 @@
 # SPDX-License-Identifier: LGPL-2.0-or-later
 from copy import copy
+from dataclasses import dataclass, field, fields
 
 from PySide6.QtGui import QColor
 
 DEFAULT_FONT = "Noto Sans Mono Condensed"
 DEFAULT_TIMEOUT_FONT = "Noto Sans Mono Condensed ExtraBold"
 DEFAULT_TASK_CACHE_KEY = "__default__"
-DEFAULT_TASK_ARGS = dict(
-    name="focus",
-    minutes=25,
-    in_menu=True,
-    command_start="",
-    command_stop="",
-    command_finish="",
-    image="",
-    # Normal appearance options
-    font=DEFAULT_FONT,
-    color=QColor("#007ba7"),
-    line_color=QColor("transparent"),
-    line_width=0,
-    text_color=QColor("white"),
-    text_stroke_width=0,
-    text_stroke_color=QColor("transparent"),
-    text_size=65,
-    text_x=0,
-    text_y=0,
-    icon_radius=30,
-    icon_padding=10,
-    # Timed out appearance options
-    timeout_font=DEFAULT_TIMEOUT_FONT,
-    timeout_color=QColor("#ff0040"),
-    timeout_line_color=QColor("transparent"),
-    timeout_line_width=0,
-    timeout_text_color=QColor("white"),
-    timeout_text_stroke_width=0,
-    timeout_text_stroke_color=QColor("transparent"),
-    timeout_text_size=65,
-    timeout_text_x=0,
-    timeout_text_y=0,
-    timeout_icon_radius=30,
-    timeout_icon_padding=10,
-)
 
 
 def to_bool(value):
@@ -61,10 +27,50 @@ class TimedOutTask:
         return getattr(self.task, attr)
 
 
+def color_field(color_name):
+    # pylint: disable=invalid-field-call
+    return field(default_factory=lambda: QColor(color_name))
+
+
+@dataclass
 class Task:
-    def __init__(self, **kwargs):
-        for k, v in DEFAULT_TASK_ARGS.items():
-            setattr(self, k, kwargs.get(k, v))
+    name: str = "focus"
+    minutes: int = 25
+    in_menu: bool = True
+    command_start: str = ""
+    command_stop: str = ""
+    command_finish: str = ""
+    image: str = ""
+
+    # Normal appearance options
+    font: str = DEFAULT_FONT
+    color: QColor = color_field("#007ba7")
+    line_color: QColor = color_field("transparent")
+    line_width: int = 0
+    text_color: QColor = color_field("white")
+    text_stroke_width: int = 0
+    text_stroke_color: QColor = color_field("transparent")
+    text_size: int = 65
+    text_x: int = 0
+    text_y: int = 0
+    icon_radius: int = 30
+    icon_padding: int = 10
+
+    # Timed out appearance options
+    timeout_font = DEFAULT_TIMEOUT_FONT
+    timeout_color: QColor = color_field("#ff0040")
+    timeout_line_color: QColor = color_field("transparent")
+    timeout_line_width: int = 0
+    timeout_text_color: QColor = color_field("white")
+    timeout_text_stroke_width: int = 0
+    timeout_text_stroke_color: QColor = color_field("transparent")
+    timeout_text_size: int = 65
+    timeout_text_x: int = 0
+    timeout_text_y: int = 0
+    timeout_icon_radius: int = 30
+    timeout_icon_padding: int = 10
+
+    animated: bool = True
 
     def __str__(self):
         return f"{self.name}/{self.minutes}"
@@ -85,6 +91,7 @@ class Break(Task):
             in_menu=in_menu,
             icon_radius=100,
             text_y=0,
+            animated=True,
         )
 
 
@@ -94,13 +101,13 @@ def read_task(settings, task_cache):
     default_task.name = name
     task = task_cache.setdefault(name, default_task)
 
-    for key, default_value in DEFAULT_TASK_ARGS.items():
-        value = settings.value(key)
+    for field_ in fields(Task):
+        value = settings.value(field_.name)
         if value:
-            convert = type(default_value)
+            convert = field_.type
             if convert is bool:
                 convert = to_bool
-            setattr(task, key, convert(value))
+            setattr(task, field_.name, convert(value))
 
     task_cache[DEFAULT_TASK_CACHE_KEY] = copy(task)
     return copy(task)
