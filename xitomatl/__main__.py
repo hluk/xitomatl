@@ -3,6 +3,7 @@
 """
 Simple pomodoro timer app residing in tray.
 """
+
 import argparse
 import signal
 import sys
