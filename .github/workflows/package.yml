@@ -22,7 +22,7 @@ jobs:
           - ubuntu-latest
 
         python-version:
-          - "3.10"
+          - "3.12"
 
         include:
           - os: windows-latest
