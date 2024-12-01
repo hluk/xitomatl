@@ -10,7 +10,7 @@ python = ">=3.10,<3.14"
 PySide6-Essentials = "^6.7.3"
 
 [tool.poetry.dev-dependencies]
-Nuitka = "^2.4.11"
+Nuitka = "^2.5.4"
 zstandard = "^0.23.0"
 imageio = [
   {version = "^2.22.4", markers = "platform_system != 'Linux'"}
