@@ -7,7 +7,7 @@ authors = ["Lukas Holecek <hluk@email.cz>"]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.14"
-PySide6-Essentials = "^6.7.3"
+PySide6-Essentials = "^6.8.1"
 
 [tool.poetry.dev-dependencies]
 Nuitka = "^2.5.9"
