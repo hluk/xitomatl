@@ -12,9 +12,20 @@ from PySide6.QtGui import (
 from xitomatl.log import log
 from xitomatl.state import State
 
+unavailable_fonts = set()
+
 
 def render_text(painter, task, size, icon_text):
-    font = QFont(task.font)
+    family, *style = task.font.split(";", maxsplit=1)
+    family = family.strip()
+    font = QFont(family)
+    if not font.exactMatch() and family not in unavailable_fonts:
+        unavailable_fonts.add(family)
+        log.warning("Font is not available: %s", family)
+
+    if style:
+        font.setStyleName(style[0].strip())
+
     font.setPixelSize(task.text_size * size.width() // 100)
 
     metrics = QFontMetrics(font)

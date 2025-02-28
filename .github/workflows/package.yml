@@ -118,5 +118,8 @@ jobs:
         shell: bash
         run: ${{ matrix.command }} --version
 
+      - name: Install dev dependencies
+        run: poetry install --no-root --no-interaction --with=dev
+
       - name: Run tests
         run: poetry run pytest
