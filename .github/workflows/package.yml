@@ -37,14 +37,14 @@ jobs:
             artifact-name: xitomatl for macOS
             artifact-file: xitomatl.app
             command: xitomatl.app/Contents/MacOS/xitomatl
-            nuitka-arguments: --macos-app-icon=xitomatl.png --clang --macos-create-app-bundle
+            nuitka-arguments: --macos-app-icon=xitomatl.svg --clang --macos-create-app-bundle
 
           - os: ubuntu-latest
             buildname: Linux
             artifact-name: xitomatl for Linux
             artifact-file: xitomatl.bin
             command: ./xitomatl.bin
-            nuitka-arguments: --linux-onefile-icon=xitomatl.png
+            nuitka-arguments: --linux-onefile-icon=xitomatl.svg
 
     steps:
       - name: Checkout source code
@@ -81,6 +81,10 @@ jobs:
         shell: bash
         run: >-
           brew link --overwrite openssl@1.1
+
+      - name: (Windows) Generate PNG icon from SVG
+        if: runner.os == 'Windows'
+        run: poetry run python svg_to_png.py
 
       - name: Use version from Git
         shell: bash
