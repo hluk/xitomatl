@@ -4,8 +4,8 @@ from dataclasses import dataclass, field, fields
 
 from PySide6.QtGui import QColor
 
-DEFAULT_FONT = "Noto Sans Mono Condensed"
-DEFAULT_TIMEOUT_FONT = "Noto Sans Mono Condensed ExtraBold"
+DEFAULT_FONT = "Noto Sans Mono; SemiBold"
+DEFAULT_TIMEOUT_FONT = "Noto Sans Mono; Bold"
 DEFAULT_TASK_CACHE_KEY = "__default__"
 
 

@@ -8,14 +8,14 @@ authors = ["Lukas Holecek <hluk@email.cz>"]
 [tool.poetry.dependencies]
 python = ">=3.10,<3.14"
 PySide6-Essentials = "^6.8.2"
-
-[tool.poetry.dev-dependencies]
 Nuitka = "^2.6.2"
 zstandard = "^0.23.0"
 imageio = [
   {version = "^2.22.4", markers = "platform_system != 'Linux'"}
 ]
 pillow = "^11.1.0"
+
+[tool.poetry.group.dev.dependencies]
 pylint = "^3.3.4"
 pytest = "^8.3.4"
 pytest-cov = "^6.0.0"
