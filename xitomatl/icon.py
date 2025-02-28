@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: LGPL-2.0-or-later
 from PySide6.QtCore import QPoint, Qt
 from PySide6.QtGui import (
+    QColorConstants,
     QFont,
     QFontMetrics,
     QPainter,
@@ -58,13 +59,13 @@ def render_text(painter, task, size, icon_text):
 
 
 def task_icon(task, state, remaining_minutes, icon_size):
-    """Created QPixmap for given task and state."""
+    """Create icon for given task and state."""
     pix = QPixmap(icon_size, icon_size)
-    pix.fill(Qt.transparent)
+    pix.fill(QColorConstants.Transparent)
     try:
         painter = QPainter(pix)
-        painter.setRenderHint(QPainter.TextAntialiasing)
-        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setRenderHint(QPainter.RenderHint.TextAntialiasing)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         if state == State.Running:
             remaining = remaining_minutes
@@ -85,7 +86,7 @@ def task_icon(task, state, remaining_minutes, icon_size):
                 painter.drawPixmap(rect, image)
         else:
             painter.drawRoundedRect(
-                rect, task.icon_radius, task.icon_radius, Qt.RelativeSize
+                rect, task.icon_radius, task.icon_radius, Qt.SizeMode.RelativeSize
             )
 
         if state == State.Stopped:
