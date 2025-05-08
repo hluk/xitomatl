@@ -62,13 +62,13 @@ def task_icon(task, state, remaining_minutes, icon_size):
     """Create icon for given task and state."""
     pix = QPixmap(icon_size, icon_size)
     pix.fill(QColorConstants.Transparent)
+    painter = QPainter(pix)
     try:
-        painter = QPainter(pix)
         painter.setRenderHint(QPainter.RenderHint.TextAntialiasing)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
+        remaining = remaining_minutes
         if state == State.Running:
-            remaining = remaining_minutes
             if remaining <= 0:
                 remaining = -remaining
                 task = task.as_timed_out()
