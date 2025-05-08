@@ -94,7 +94,7 @@ class Pomodoro:
 
         self.timer = QTimer()
         self.timer.setSingleShot(True)
-        self.timer.setTimerType(Qt.VeryCoarseTimer)
+        self.timer.setTimerType(Qt.TimerType.VeryCoarseTimer)
         self.timer.timeout.connect(self.on_timeout)
         self.finished = True
 

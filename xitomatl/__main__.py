@@ -42,7 +42,7 @@ def create_app():
 
     QCoreApplication.setOrganizationName(APP_ID)
     QCoreApplication.setApplicationName(APP_ID)
-    QSettings.setDefaultFormat(QSettings.IniFormat)
+    QSettings.setDefaultFormat(QSettings.Format.IniFormat)
 
     args = parse_args()
 
@@ -52,7 +52,7 @@ def create_app():
         init_logging()
 
     if args.config:
-        settings = QSettings(args.config, QSettings.IniFormat)
+        settings = QSettings(args.config, QSettings.Format.IniFormat)
     else:
         settings = QSettings()
 
