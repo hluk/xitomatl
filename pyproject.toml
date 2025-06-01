@@ -16,7 +16,7 @@ imageio = [
 pillow = "^11.2.1"
 
 [tool.poetry.group.dev.dependencies]
-pylint = "^3.3.6"
+pylint = "^3.3.7"
 pytest = "^8.3.5"
 pytest-cov = "^6.1.1"
 
