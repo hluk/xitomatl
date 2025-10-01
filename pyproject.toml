@@ -7,9 +7,9 @@ authors = ["Lukas Holecek <hluk@email.cz>"]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.14"
-PySide6-Essentials = "^6.9.2"
+PySide6-Essentials = "^6.9.3"
 Nuitka = "^2.6.9"
-zstandard = "^0.24.0"
+zstandard = "^0.25.0"
 imageio = [
   {version = "^2.22.4", markers = "platform_system != 'Linux'"}
 ]
@@ -17,7 +17,7 @@ pillow = "^11.3.0"
 
 [tool.poetry.group.dev.dependencies]
 pylint = "^3.3.8"
-pytest = "^8.4.1"
+pytest = "^8.4.2"
 pytest-cov = "^6.2.1"
 
 [tool.poetry.scripts]
