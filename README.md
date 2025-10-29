@@ -67,9 +67,7 @@ See [xitomatl.ini](xitomatl.ini) for the default configuration.
 
 Clone repository and **start** the app with:
 
-    poetry run python -m ensurepip --upgrade
-    poetry install
-    poetry run xitomatl
+    uv run xitomatl
 
 Install **pre-commit** for local repository clone:
 
@@ -78,4 +76,4 @@ Install **pre-commit** for local repository clone:
 Run **all checks**:
 
     pre-commit run --all-files
-    poetry run pytest
+    uv run pytest

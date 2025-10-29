@@ -53,15 +53,13 @@ jobs:
           submodules: false
           fetch-depth: 0
 
-      - uses: actions/setup-python@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@85856786d1ce8acfbcc2f13a5f3fbd6b938f9f41 # v7
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Use Poetry
-        uses: Gr1N/setup-poetry@v9
-
       - name: Install dependencies
-        run: poetry install --no-root --no-interaction
+        run: uv sync
 
       - name: (Linux) Install runtime dependencies
         if: runner.os == 'Linux'
@@ -84,7 +82,7 @@ jobs:
 
       - name: (macOS & Windows) Generate PNG icon from SVG
         if: ${{ runner.os == 'macOS' || runner.os == 'Windows' }}
-        run: poetry run python svg_to_png.py
+        run: uv run python svg_to_png.py
 
       - name: Use version from Git
         shell: bash
@@ -95,7 +93,7 @@ jobs:
           PYTHONIOENCODING: utf-8
           LD_LIBRARY_PATH: /usr/local/lib/:$LD_LIBRARY_PATH
         run: >-
-          poetry run python -m nuitka
+          uv run python -m nuitka
           --onefile
           --standalone
           --python-flag=no_site
@@ -123,7 +121,7 @@ jobs:
         run: ${{ matrix.command }} --version
 
       - name: Install dev dependencies
-        run: poetry install --no-root --no-interaction --with=dev
+        run: uv sync --group dev
 
       - name: Run tests
-        run: poetry run pytest
+        run: uv run pytest

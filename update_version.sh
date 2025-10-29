@@ -9,4 +9,4 @@ version=$(
 sed -i -e "s/^__version__\s*=\s.*/__version__ = '$version'/" \
   xitomatl/__init__.py
 
-poetry version "$version"
+uv version "$version"
