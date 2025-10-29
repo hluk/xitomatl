@@ -20,7 +20,7 @@ xitomatl = "xitomatl.__main__:main"
 dev = [
     "pylint>=3.3.8,<4",
     "pytest>=8.4.2,<9",
-    "pytest-cov>=6.2.1,<7",
+    "pytest-cov>=6.2.1,<8",
 ]
 
 [build-system]
