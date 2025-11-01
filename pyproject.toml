@@ -10,7 +10,7 @@ dependencies = [
     "Nuitka>=2.6.9,<3",
     "zstandard>=0.25.0,<1",
     "imageio>=2.22.4,<3; platform_system != 'Linux'",
-    "pillow>=11.3.0,<12",
+    "pillow>=11.3.0,<13",
 ]
 
 [project.scripts]
