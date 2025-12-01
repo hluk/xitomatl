@@ -19,7 +19,7 @@ xitomatl = "xitomatl.__main__:main"
 [dependency-groups]
 dev = [
     "pylint>=3.3.8,<5",
-    "pytest>=8.4.2,<9",
+    "pytest>=8.4.2,<10",
     "pytest-cov>=6.2.1,<8",
 ]
 
