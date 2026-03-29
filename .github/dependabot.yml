@@ -13,3 +13,8 @@ updates:
           - "major"
           - "minor"
           - "patch"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
