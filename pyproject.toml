@@ -10,7 +10,7 @@ dependencies = [
     "Nuitka>=2.6.9,<3",
     "zstandard>=0.25.0,<1",
     "imageio>=2.22.4,<3; platform_system != 'Linux'",
-    "pillow>=11.3.0,<13",
+    "pillow>=12.3.0,<13",
 ]
 
 [project.scripts]
@@ -18,8 +18,8 @@ xitomatl = "xitomatl.__main__:main"
 
 [dependency-groups]
 dev = [
-    "pylint>=3.3.8,<5",
-    "pytest>=9.0.3,<10",
+    "pylint>=4.0.6,<5",
+    "pytest>=9.1.1,<10",
     "pytest-cov>=6.2.1,<8",
 ]
 
