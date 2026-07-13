@@ -74,12 +74,6 @@ jobs:
             libegl1
             libopengl0
 
-      - name: (macOS) Fix build dependencies
-        if: runner.os == 'macOS'
-        shell: bash
-        run: >-
-          brew link --overwrite openssl@1.1
-
       - name: (macOS & Windows) Generate PNG icon from SVG
         if: ${{ runner.os == 'macOS' || runner.os == 'Windows' }}
         run: uv run python svg_to_png.py
