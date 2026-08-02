@@ -59,7 +59,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: uv sync
+        run: uv sync --locked --no-build --no-binary-package xitomatl --no-binary-package nuitka
 
       - name: (Linux) Install runtime dependencies
         if: runner.os == 'Linux'
@@ -76,7 +76,7 @@ jobs:
 
       - name: (macOS & Windows) Generate PNG icon from SVG
         if: ${{ runner.os == 'macOS' || runner.os == 'Windows' }}
-        run: uv run python svg_to_png.py
+        run: uv run --locked --no-build --no-binary-package xitomatl --no-binary-package nuitka python svg_to_png.py
 
       - name: Use version from Git
         shell: bash
@@ -87,7 +87,7 @@ jobs:
           PYTHONIOENCODING: utf-8
           LD_LIBRARY_PATH: /usr/local/lib/:$LD_LIBRARY_PATH
         run: >-
-          uv run python -m nuitka
+          uv run --locked --no-build --no-binary-package xitomatl --no-binary-package nuitka python -m nuitka
           --onefile
           --standalone
           --python-flag=no_site
@@ -115,7 +115,7 @@ jobs:
         run: ${{ matrix.command }} --version
 
       - name: Install dev dependencies
-        run: uv sync --group dev
+        run: uv sync --group dev --locked --no-build --no-binary-package xitomatl --no-binary-package nuitka
 
       - name: Run tests
-        run: uv run pytest
+        run: uv run --locked --no-build --no-binary-package xitomatl --no-binary-package nuitka pytest
