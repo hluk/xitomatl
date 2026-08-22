@@ -68,10 +68,9 @@ def task_icon(task, state, remaining_minutes, icon_size):
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         remaining = remaining_minutes
-        if state == State.Running:
-            if remaining <= 0:
-                remaining = -remaining
-                task = task.as_timed_out()
+        if state == State.Running and remaining <= 0:
+            remaining = -remaining
+            task = task.as_timed_out()
 
         painter.setPen(QPen(task.line_color, task.line_width * icon_size // 100))
 
