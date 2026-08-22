@@ -27,11 +27,6 @@ class TimedOutTask:
         return getattr(self.task, attr)
 
 
-def color_field(color_name):
-    # pylint: disable=invalid-field-call
-    return field(default_factory=lambda: QColor(color_name))
-
-
 @dataclass
 class Task:
     name: str = "focus"
@@ -44,12 +39,12 @@ class Task:
 
     # Normal appearance options
     font: str = DEFAULT_FONT
-    color: QColor = color_field("#007ba7")
-    line_color: QColor = color_field("transparent")
+    color: QColor = field(default_factory=lambda: QColor("#007ba7"))
+    line_color: QColor = field(default_factory=lambda: QColor("transparent"))
     line_width: int = 0
-    text_color: QColor = color_field("white")
+    text_color: QColor = field(default_factory=lambda: QColor("white"))
     text_stroke_width: int = 0
-    text_stroke_color: QColor = color_field("transparent")
+    text_stroke_color: QColor = field(default_factory=lambda: QColor("transparent"))
     text_size: int = 65
     text_x: int = 0
     text_y: int = 0
@@ -58,12 +53,14 @@ class Task:
 
     # Timed out appearance options
     timeout_font = DEFAULT_TIMEOUT_FONT
-    timeout_color: QColor = color_field("#ff0040")
-    timeout_line_color: QColor = color_field("transparent")
+    timeout_color: QColor = field(default_factory=lambda: QColor("#ff0040"))
+    timeout_line_color: QColor = field(default_factory=lambda: QColor("transparent"))
     timeout_line_width: int = 0
-    timeout_text_color: QColor = color_field("white")
+    timeout_text_color: QColor = field(default_factory=lambda: QColor("white"))
     timeout_text_stroke_width: int = 0
-    timeout_text_stroke_color: QColor = color_field("transparent")
+    timeout_text_stroke_color: QColor = field(
+        default_factory=lambda: QColor("transparent")
+    )
     timeout_text_size: int = 65
     timeout_text_x: int = 0
     timeout_text_y: int = 0
