@@ -17,7 +17,7 @@ repos:
 
   # Sort imports
   - repo: https://github.com/pycqa/isort
-    rev: 9.0.0b1
+    rev: 9.0.1
     hooks:
       - id: isort
         name: isort
@@ -27,7 +27,7 @@ repos:
 
   # Remove unused imports, variables, statements
   - repo: https://github.com/PyCQA/autoflake
-    rev: v2.3.3
+    rev: v2.4.0
     hooks:
       - id: autoflake
 
@@ -41,7 +41,7 @@ repos:
 
   # Linter and formatter
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.1
+    rev: v0.16.6
     hooks:
       - id: ruff
         args:
