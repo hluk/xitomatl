@@ -4,13 +4,13 @@ version = "0.1.0"
 description = "Simple pomodoro timer app residing in tray"
 license = {text = "GPL-2.0-or-later"}
 authors = [{name = "Lukas Holecek", email = "hluk@email.cz"}]
-requires-python = ">=3.10,<3.15"
+requires-python = ">=3.10,<3.16"
 dependencies = [
     "PySide6-Essentials>=6.9.3,<7",
-    "Nuitka>=2.6.9,<3",
+    "nuitka>=2.6.9,<5",
     "zstandard>=0.25.0,<1",
     "imageio>=2.37.4,<3; platform_system != 'Linux'",
-    "pillow>=12.3.0,<13",
+    "pillow>=12.3.0,<14",
 ]
 
 [project.scripts]
